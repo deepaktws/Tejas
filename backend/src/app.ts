@@ -6,6 +6,7 @@ import authRouter from "./modules/auth/auth.router";
 import plantRouter from "./modules/plant/plant.router";
 import locationRouter from "./modules/location/location.router";
 import userRouter from "./modules/user/user.router";
+import permissionRouter from "./modules/permission/permission.router";
 
 export const app = express();
 
@@ -20,6 +21,7 @@ apiRouter.use("/auth", authRouter);
 apiRouter.use("/plants", plantRouter);
 apiRouter.use("/locations", locationRouter);
 apiRouter.use("/users", userRouter);
+apiRouter.use("/permissions", permissionRouter);
 
 app.use("/api/v1", apiRouter);
 
