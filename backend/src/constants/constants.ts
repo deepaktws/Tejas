@@ -51,5 +51,12 @@ export const StatusMessages = {
     USER_CREATED: "User created successfully",
     USER_UPDATED: "User updated successfully",
     USER_DELETED: "User deleted successfully",
+    
     FORBIDDEN: "Forbidden",
+
+    PERMISSION_ALREADY_EXISTS: "Permission already exists",
+    PERMISSION_CREATED: "Permission created successfully",
+    PERMISSION_NOT_FOUND: "Permission not found",
+    PERMISSION_UPDATED: "Permission updated successfully",
+    PERMISSION_DELETED: "Permission deleted successfully",
 } 
