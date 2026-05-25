@@ -1,58 +1,56 @@
-import * as React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import { Navbar } from './Navbar';
-import HomeTab from './HomeTab';
-import AdminTab from './AdminTab';
+import { useEffect, useState } from 'react';
+import OrganizationCard from './OrganizationCard';
+import { getLocations } from '../../service/location.service';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+interface Location {
+    id: string;
+    name: string;
+    description: string;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-  
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-      </div>
-    );
-  }
-
 function Location() {
-    const [value, setValue] = React.useState(0);
-    const handleChange = (event: React.SyntheticEvent<Element, Event>, newValue: number) => {
-        setValue(newValue);
-    };
+    const [breadcrumbs, setBreadcrumbs] = useState<string[]>(["Locations"]);
+    const [locations, setLocations] = useState<Location[]>([]);
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try{
+            const res = await getLocations();
+            const data = res.body.data;
+            setLocations(data);
+            }catch(error){
+                console.error(error);
+            }
+        }
+        fetchLocations();
+    }, []);
+    const handleLocationClick = (location: Location) => {
+        
+    }
     return (
-        <div className="flex flex-col h-full">
-            <Navbar />
-            <div className="flex-1">
-                <div className="flex flex-col h-full bg-surface-card">
-                    <Box sx={{ borderBottom: 0, px: 2, py: 1 }}>
-                        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                            <Tab label="Home" />
-                            <Tab label="Admin" />
-                        </Tabs>
-                    </Box>
-                    <CustomTabPanel value={value} index={0}>
-                        <HomeTab/>
-                    </CustomTabPanel>
-                    <CustomTabPanel value={value} index={1}>
-                        <AdminTab/>
-                    </CustomTabPanel>
+        <div className="flex flex-col h-full p-4">
+            <div className="flex-1 overflow-auto">
+                <div className="flex flex-row h-full bg-surface-card">
+                {breadcrumbs.length > 0 && breadcrumbs.map((breadcrumb) => (
+                    <h2 className="text-lg font-medium text-text-heading" key={breadcrumb}>
+                        {breadcrumb}
+                        <span className="text-text-muted">
+                            {breadcrumb === breadcrumbs[breadcrumbs.length - 1] ? '' : ' > '}
+                        </span>
+                    </h2>
+                ))}
+                </div>
+                <div className="flex flex-wrap gap-6 py-4">
+                    {locations.length === 0 && <div className="flex flex-col items-center justify-center h-full">
+                        <h2 className="text-lg font-medium text-text-heading">No locations found</h2>
+                    </div>}
+                    {locations.length > 0 && locations.map((location,index) => (
+                        <OrganizationCard key={index} name={location.name} onclick={() => handleLocationClick(location.id)} />
+                    ))}
                 </div>
             </div>
         </div>
-    )
+    );   
+    
 }
 export default Location

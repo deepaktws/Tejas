@@ -69,7 +69,7 @@ export default function SelectLocationPage() {
             type="button"
             disabled={!canProceed}
             onClick={() => {
-              navigate('/dashboard?type=' + selectedViewPreference)
+              navigate(`/dashboard/${selectedViewPreference === ViewPreference.Location ? 'location' : 'plant'}`)
             }}
             className={[
               'h-[50px] w-full rounded-[14px] border border-surface-glass-border text-sm font-semibold transition-opacity',
