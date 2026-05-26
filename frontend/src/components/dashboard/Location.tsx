@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import OrganizationCard from './OrganizationCard';
-import { getLocations, getPlantsByLocation } from '../../service/location.service';
+import { locationsData, plantsData } from '../../staticData';
+import { getLocations } from '../../service/location.service';
 
 interface Location {
     id: string;
@@ -18,97 +19,49 @@ interface Plant {
 
 type BreadcrumbItem = {
     label: string;
-    view: 'locations' | 'plants';
+    view: 'location' | 'plant';
     locationId?: string;
 };
 
-const locationsData: Location[] = [
-    {
-        id: '1',
-        name: 'Jajpur',
-        image: 'https://picsum.photos/id/101/200',
-        description: 'This is the description of Jajpur',
-    },
-    {
-        id: '2',
-        name: 'Dhenkanal',
-        image: 'https://picsum.photos/id/123/200',
-        description: 'This is the description of Dhenkanal',
-    },
-    {
-        id: '3',
-        name: 'Cuttack',
-        image: 'https://picsum.photos/id/103/200',
-        description: 'This is the description of Cuttack',
-    },
-    {
-        id: '4',
-        name: 'Bhubaneswar',
-        image: 'https://picsum.photos/id/104/200',
-        description: 'This is the description of Bhubaneswar',
-    },
-    {
-        id: '5',
-        name: 'Baleswar',
-        image: 'https://picsum.photos/id/106/200',
-        description: 'This is the description of Baleswar',
-    },
-    {
-        id: '6',
-        name: 'Balasore',
-        image: 'https://picsum.photos/id/107/200',
-        description: 'This is the description of Balasore',
-    },
-    {
-        id: '7',
-        name: 'Ganjam',
-        image: 'https://picsum.photos/id/108/200',
-        description: 'This is the description of Ganjam',
-    },
-    {
-        id: '8',
-        name: 'Koraput',
-        image: 'https://picsum.photos/id/179/200',
-        description: 'This is the description of Koraput',
-    },
-    {
-        id: '9',
-        name: 'Sambalpur',
-        image: 'https://picsum.photos/id/110/200',
-        description: 'This is the description of Sambalpur',
-    },
-    {
-        id: '10',
-        name: 'Nayagarh',
-        image: 'https://picsum.photos/id/111/200',
-        description: 'This is the description of Nayagarh',
-    },
-];
+
 
 function Location() {
-    const [locations] = useState<Location[]>(locationsData);
+    const [locations, setLocations] = useState<Location[]>([]);
     const [plants, setPlants] = useState<Plant[]>([]);
     const [isLoadingPlants, setIsLoadingPlants] = useState(false);
 
     // breadcrumbs drive the current view
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
-        { label: 'Locations', view: 'locations' },
+        { label: 'Location', view: 'location' },
     ]);
 
     const currentView = breadcrumbs[breadcrumbs.length - 1];
 
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                // const res = await getLocations(); // call here the service to fetch all the locations
+                // const data = res.body.data;
+                setLocations(locationsData);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        fetchLocations();
+    }, []);
+
     // Fetch plants whenever we navigate into a location
     useEffect(() => {
-        if (currentView.view !== 'plants' || !currentView.locationId) return;
+        if (currentView.view !== 'plant' || !currentView.locationId) return;
 
         const fetchPlants = async () => {
             setIsLoadingPlants(true);
             try {
-                const res = await getPlantsByLocation(currentView.locationId!);
-                setPlants(res.body.data);
+                // const plants = await getPlantsByLocation(currentView.label); // call here the service to fetch plants by location name
+                setPlants(plantsData);
             } catch (error) {
                 console.error(error);
-                setPlants([]);
             } finally {
                 setIsLoadingPlants(false);
             }
@@ -122,7 +75,7 @@ function Location() {
             ...prev,
             {
                 label: location.name,
-                view: 'plants',
+                view: 'plant',
                 locationId: location.id,
             },
         ]);
@@ -133,7 +86,7 @@ function Location() {
         // Clicking the last (active) crumb does nothing
         if (index === breadcrumbs.length - 1) return;
         setBreadcrumbs((prev) => prev.slice(0, index + 1));
-        if (breadcrumbs[index].view === 'locations') {
+        if (breadcrumbs[index].view === 'location') {
             setPlants([]);
         }
     };
@@ -146,21 +99,26 @@ function Location() {
                 <div className="flex flex-row flex-wrap items-center gap-1 h-auto bg-surface-card mb-2">
                     {breadcrumbs.map((crumb, index) => {
                         const isLast = index === breadcrumbs.length - 1;
+                        const isFirst = index === 0;
                         return (
                             <span key={index} className="flex items-center">
                                 <button
                                     onClick={() => handleBreadcrumbClick(index)}
                                     disabled={isLast}
-                                    className={`text-lg font-medium transition-colors ${
-                                        isLast
-                                            ? 'text-text-heading cursor-default'
-                                            : 'text-primary hover:underline cursor-pointer'
-                                    }`}
+                                    className={`text-lg font-medium transition-colors${isLast
+                                        ? 'cursor-default'
+                                        : 'hover:underline cursor-pointer'
+                                        }
+                                        ${isFirst
+                                            ? 'text-text-primary'
+                                            : 'text-brand-danger font-bold'
+                                        }
+                                `}
                                 >
                                     {crumb.label}
                                 </button>
                                 {!isLast && (
-                                    <span className="text-text-muted mx-1 select-none">&gt;</span>
+                                    <span className="text-brand-danger mx-1 select-none">&gt;</span>
                                 )}
                             </span>
                         );
@@ -168,7 +126,7 @@ function Location() {
                 </div>
 
                 {/* Locations view */}
-                {currentView.view === 'locations' && (
+                {currentView.view === 'location' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4 w-full">
                         {locations.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full col-span-full">
@@ -187,7 +145,7 @@ function Location() {
                 )}
 
                 {/* Plants view */}
-                {currentView.view === 'plants' && (
+                {currentView.view === 'plant' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4 w-full">
                         {isLoadingPlants && (
                             <div className="flex flex-col items-center justify-center h-full col-span-full">
@@ -204,7 +162,7 @@ function Location() {
                                 key={index}
                                 name={plant.name}
                                 image={plant.image}
-                                onclick={() => {/* handle plant click if needed */}}
+                                onclick={() => {/* handle plant click if needed */ }}
                             />
                         ))}
                     </div>
