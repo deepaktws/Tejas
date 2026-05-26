@@ -8,34 +8,34 @@ import { Button, Checkbox, TextField } from '../ui'
 import { images } from '../../utils/images'
 import { useNavigate } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
+import { toast } from 'react-toastify'
 type LoginFormProps = {
   onSignIn?: (username: string, password: string) => void
 }
 
 export function LoginForm({ onSignIn }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [submitDisabled, setSubmitDisabled] = useState(true) // implement logic to check if the form is valid and disable the button if not
-  const [error, setError] = useState('')
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   })
+  const isSubmitDisabled =
+    !formData.username.trim() || !formData.password.trim()
   const [loading, setLoading] = useState(false)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-    setSubmitDisabled(formData.username.length === 0 || formData.password.length === 0 || !e.target.value)
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
     try{
       await onSignIn?.(formData.username, formData.password)
+      toast.success('Login successful')
     }catch(error: any){
       setLoading(false)
-      console.error(error)
-      setError(error.message)
+      toast.error(error.message)
     }finally{
       setLoading(false)
     }
@@ -98,24 +98,9 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Checkbox
-            label="Remember me"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          <button
-            type="button"
-            className="text-sm font-medium text-brand-accent hover:underline"
-          >
-            Forgot password?
-          </button>
-        </div>
-
-        <Button type="submit" variant="secondary" fullWidth disabled={submitDisabled || loading}>
+        <Button type="submit" variant="secondary" fullWidth disabled={isSubmitDisabled || loading}>
           {loading ? <CircularProgress size={20}/> : 'Sign In'}
         </Button>
-        {error && <p className="text-brand-danger text-center">{error}</p>}
 
         <div className="relative flex items-center py-1">
           <div className="h-px flex-1 bg-border-default" />
