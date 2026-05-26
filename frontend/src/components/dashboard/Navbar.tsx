@@ -9,7 +9,7 @@ export function Navbar() {
   const [username, setUsername] = useState('Garvit Singhal ')
 
   return (
-    <header className="flex h-14 items-center justify-between bg-brand-primary px-6 py-4">
+    <header className="flex h-14 items-center justify-between bg-brand-primary pr-6 py-4">
       <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-8 object-contain " />
       <div className="flex items-center gap-5">
         {/* <div
