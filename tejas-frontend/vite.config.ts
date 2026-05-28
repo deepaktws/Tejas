@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    optimizeDeps: {
+      include: ["xlsx"],
+    },
     server: {
       port,
       proxy: {

@@ -1,12 +1,15 @@
-import CustomTable from "./CustomTable";
-import ProductionStats from "./ProductionStats";
 import { orderPlanData, scrapAvailabilityData } from "../../staticData";
+import CustomTable from "./CustomTable";
+import CustomTableWithData from "./CustomTableWithData";
+import ProductionStats from "./ProductionStats";
+
 function Home() {
     return (
         <div className="px-6 py-4">
             <ProductionStats />
-            <CustomTable title="Order Plan" data={orderPlanData} />
-            <CustomTable title="SCRAP AVAILABILITY" data={scrapAvailabilityData} />
+            <CustomTableWithData title="ORDER PLAN" data={orderPlanData} />
+            <CustomTableWithData title="SCRAP AVAILABILITY" data={scrapAvailabilityData} />
+            <CustomTable title="Upload Your Excel File Here" />
         </div>
     )
 }
