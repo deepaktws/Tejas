@@ -12,6 +12,10 @@ export function Navbar() {
   return (
     <header className="flex h-14 items-center justify-between bg-brand-primary px-6 py-4">
       <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 mr-4 object-contain rounded-lg" />
+      <div className="flex items-center">
+        <img src={images.tejasLogo} alt="Tejas Logo" className="w-15 h-10 object-contain" />
+        <img src={images.tejasNameLogo} alt="Tejas Name Logo" className="w-30 h-10 object-contain" />
+      </div>
       <div className="flex items-center gap-5">
          <div
           role="group"

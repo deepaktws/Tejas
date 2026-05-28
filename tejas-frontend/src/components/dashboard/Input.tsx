@@ -1,7 +1,7 @@
 function Input() {
     return (
         <div>
-            Input
+            Input Page
         </div>
     )
 }

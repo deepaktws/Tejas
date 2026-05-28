@@ -1,36 +1,34 @@
-import { NavLink } from "react-router-dom";
-import { Button } from "../../components/ui/Button";
+import { NavLink } from 'react-router-dom'
+import { images } from '../../utils/images'
 
 const dashboardTabs = [
-    { label: 'Home', path: '/dashboard' },
-    { label: 'Input', path: '/dashboard/input' },
+  { label: 'Home', path: '/dashboard', icon: images.homeIcon },
+  { label: 'Input', path: '/dashboard/input', icon: images.calculatorIcon },
 ] as const
 
 function Tabs() {
-    return (
-        <nav
-                    className="flex gap-1 border-border-default bg-surface-card"
-                    aria-label="Dashboard sections"
-                >
-                    {dashboardTabs.map((tab) => (
-                        <NavLink
-                            key={tab.path}
-                            to={tab.path}
-                            end
-                            className={({ isActive }) =>
-                                [
-                                    ' text-sm font-semibold transition-colors py-3.5 px-6.5 rounded-t-lg',
-                                    isActive
-                                        ? 'border-brand-danger border-2 border-b-0 text-brand-danger'
-                                        : 'border-border-default text-text-secondary bg-gray-100 hover:text-text-primary',
-                                ].join(' ')
-                            }
-                        >
-                            {tab.label}
-                        </NavLink>
-                    ))}
-                </nav>
-    )
+  return (
+    <nav className="flex items-center gap-4 px-6 py-4" aria-label="Dashboard sections">
+      {dashboardTabs.map((tab) => (
+        <NavLink
+          key={tab.path}
+          to={tab.path}
+          end
+          className={({ isActive }) =>
+            [
+              'inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors duration-200',
+              isActive
+                ? 'bg-[#17479E0F] text-[#0F3173] font-bold'
+                : 'text-text-secondary hover:text-text-primary',
+            ].join(' ')
+          }
+        >
+          <img src={tab.icon} alt={tab.label} className="w-4 h-4" />
+          {tab.label}
+        </NavLink>
+      ))}
+    </nav>
+  )
 }
 
 // function TabsWithButton({buttonText,onButtonClick}: {buttonText: string,onButtonClick: () => void}) {
