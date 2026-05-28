@@ -7,6 +7,10 @@ import NotFound from "./pages/NotFound";
 import { useSelector } from "react-redux";
 import Location from "./components/dashboard/Location";
 import Plant from "./components/dashboard/Plant";
+import Admin from "./pages/Admin";
+import User from "./components/admin/User";
+import AdminLocation from "./components/admin/AdminLocation";
+import Area from "./components/admin/Area";
 function Routers() {
   const token = useSelector(
     (state: any) => state.auth.accessToken
@@ -25,6 +29,12 @@ function Routers() {
       <Route path="/login" element={token ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/contact-administrator" element={<ContactAdministrator />} />
       <Route path="/select-location" element={token ? <SelectLocationPage /> : <Navigate to="/login" />} />
+      <Route path="/admin" element={token ? <Admin /> : <Navigate to="/login" />}>
+        <Route index element={<Navigate to="user" />} />
+        <Route path="user" element={<User />} />
+        <Route path="location" element={<AdminLocation />} />
+        <Route path="area" element={<Area />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
