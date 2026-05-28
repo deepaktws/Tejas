@@ -11,7 +11,7 @@ export function Navbar() {
 
   return (
     <header className="flex h-14 items-center justify-between bg-brand-primary px-6 py-4">
-      <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 mr-4 object-contain rounded-lg shadow-lg" />
+      <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 mr-4 object-contain rounded-lg" />
       <div className="flex items-center gap-5">
          <div
           role="group"
