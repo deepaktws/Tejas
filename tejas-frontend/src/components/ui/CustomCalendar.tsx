@@ -93,7 +93,7 @@ export default function CustomCalendar({ onCancel, onChoose, date }: { onCancel:
                 "relative flex flex-col items-center justify-center aspect-square rounded-[10px] m-[2px] transition-colors",
                 cell.currentMonth ? "cursor-pointer" : "cursor-default",
                 isSelected
-                  ? "bg-brand-primary"
+                  ? "bg-brand-accent"
                   : isToday
                   ? "bg-blue-50 border-2 border-blue-300"
                   : cell.currentMonth
@@ -121,7 +121,7 @@ export default function CustomCalendar({ onCancel, onChoose, date }: { onCancel:
       </div>
 
       {/* Footer */}
-      <div className="flex gap-2.5 mt-5">
+      <div className="flex gap-4 mt-5">
         <button
           onClick={onCancel}
           className="flex-1 py-[14px] bg-gray-200 text-gray-500 rounded-[14px] text-base font-normal hover:bg-gray-300 transition-colors"
@@ -130,7 +130,7 @@ export default function CustomCalendar({ onCancel, onChoose, date }: { onCancel:
         </button>
         <button
           onClick={handleChoose}
-          className="flex-2 py-[14px] bg-brand-primary text-white rounded-[14px] text-base font-semibold hover:bg-brand-primary-dark transition-colors"
+          className="flex-1 py-[14px] bg-brand-accent text-white rounded-[14px] text-base font-semibold hover:bg-brand-primary-dark transition-colors"
         >
           Choose Date
         </button>

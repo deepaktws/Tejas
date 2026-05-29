@@ -6,10 +6,9 @@ const dashboardTabs = [
   { label: 'Input', path: '/dashboard/input', icon: images.calculatorIcon },
 ] as const
 
-function Tabs({ rightComponent }: { rightComponent: React.ReactNode }) {
+function Tabs() {
   return (
-    <div className="flex items-center justify-between px-6 py-4">
-      <nav className="flex items-center gap-4" aria-label="Dashboard sections">
+      <nav className="flex items-center gap-4 px-6 py-2" aria-label="Dashboard sections">
         {dashboardTabs.map((tab) => (
           <NavLink
             key={tab.path}
@@ -29,10 +28,6 @@ function Tabs({ rightComponent }: { rightComponent: React.ReactNode }) {
           </NavLink>
         ))}
       </nav>
-      <div className="">
-        {rightComponent}
-      </div>
-    </div>
   )
 }
 

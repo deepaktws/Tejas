@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { parseExcelFile } from "../../utils/parseExcelFile";
+import { parseExcelFile } from "../../../utils/parseExcelFile";
 
 interface CustomTableProps {
     title: string;
@@ -101,9 +101,9 @@ function CustomTable({ title }: CustomTableProps) {
                         type="button"
                         onClick={handleUploadClick}
                         disabled={isParsing}
-                        className="rounded-lg border border-brand-primary bg-brand-primary px-4 py-2 text-sm font-medium text-zinc-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-md bg-[linear-gradient(174.84deg,#16A34A_29.64%,#083D1C_231.54%)] px-7 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {isParsing ? "Uploading..." : "Upload Excel"}
+                        {isParsing ? "Uploading..." : "UPLOAD DATA"}
                     </button>
                     {hasUploadedData && (
                         <button
@@ -112,7 +112,7 @@ function CustomTable({ title }: CustomTableProps) {
                             disabled={isParsing}
                             className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Remove Excel
+                            REMOVE DATA
                         </button>
                     )}
                 </div>
