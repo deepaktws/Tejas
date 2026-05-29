@@ -5,7 +5,7 @@ import { images } from '../../utils/images'
 type ControlMode = 'manual' | 'auto'
 
 export function Navbar() {
-  const [notifications, setNotifications] = useState(0)
+  const [notifications, setNotifications] = useState(2)
   const [username, setUsername] = useState('Garvit Singhal ')
   const [mode, setMode] = useState<'manual' | 'auto'>('manual')
 
