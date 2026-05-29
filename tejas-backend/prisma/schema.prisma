@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,32 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model heat_scrap_optimization {
+  id                  Int       @id @default(autoincrement())
+  heat_id             Int?
+  stage_group         Int?
+  grade_name          String?
+  quantity            Int?
+  elements            String?
+  opening_chemistry   Float?
+  target_min          Float?
+  target_max          Float?
+  predicted_chemistry Float?
+  actual_chemistry    Float?
+  model_suggested     Int?
+  operator_additions  Int?
+  scrap_category      String?
+  scrap_type          String?
+  cost                Float?
+  availability        Int?
+  fe_percent          Float?
+  c_percent           Float?
+  mn_percent          Float?
+  si_percent          Float?
+  p_percent           Float?
+  created_at          DateTime? @default(now())
+  updated_at          DateTime? @updatedAt
+  deleted_at          DateTime?
 }
