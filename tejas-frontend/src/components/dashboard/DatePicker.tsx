@@ -36,7 +36,7 @@ function DatePicker() {
       {/* Styled date trigger */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 text-brand-primary font-medium text-[15px] hover:opacity-80 transition-opacity"
+        className="flex items-center gap-1.5 text-brand-primary font-medium text-[15px] hover:text-brand-primary-dark transition-opacity cursor-pointer"
       >
         <span>{formatDate(date)}</span>
         <svg
