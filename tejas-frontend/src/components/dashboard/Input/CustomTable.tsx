@@ -3,7 +3,14 @@ import { parseExcelFile } from "../../../utils/parseExcelFile";
 
 interface CustomTableProps {
     title: string;
+    /** When set, the uploaded sheet must have at least one column whose header matches this pattern. */
+    requiredColumnPattern?: RegExp;
+    /** Shown in validation errors; defaults to "required column". */
+    requiredColumnLabel?: string;
 }
+
+const hasMatchingColumn = (columnNames: string[], pattern: RegExp) =>
+    columnNames.some((name) => pattern.test(name.trim()));
 
 const formatHeader = (key: string) =>
     key
@@ -11,7 +18,7 @@ const formatHeader = (key: string) =>
         .replace(/[_-]/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
 
-function CustomTable({ title }: CustomTableProps) {
+function CustomTable({ title, requiredColumnPattern, requiredColumnLabel }: CustomTableProps) {
     const [data, setData] = useState<Record<string, unknown>[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [uploadError, setUploadError] = useState<string | null>(null);
@@ -68,6 +75,17 @@ function CustomTable({ title }: CustomTableProps) {
             if (parsedRows.length === 0) {
                 setUploadError("The selected file has no data.");
                 return;
+            }
+
+            if (requiredColumnPattern) {
+                const columnNames = Object.keys(parsedRows[0]);
+                if (!hasMatchingColumn(columnNames, requiredColumnPattern)) {
+                    const label = requiredColumnLabel ?? "required column";
+                    setUploadError(
+                        `The selected file must include a column for ${label}. Please check the header row and try again.`,
+                    );
+                    return;
+                }
             }
 
             setData(parsedRows);

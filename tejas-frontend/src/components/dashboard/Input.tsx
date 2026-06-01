@@ -8,7 +8,11 @@ function Input() {
     <div className="flex flex-col gap-4 bg-surface-card px-6 py-5">
       {/* <CustomTableWithData title="ORDER PLAN" data={orderPlanData} />
       <CustomTableWithData title="SCRAP AVAILABILITY" data={scrapAvailabilityData} /> */}
-      <CustomTable title="Heat Schedule" />
+      <CustomTable
+        title="Heat Schedule"
+        requiredColumnPattern={/heat[\s_-]*id/i}
+        requiredColumnLabel="Heat ID"
+      />
       <CustomTable title="Scrap Availability" />
     </div>
   )
