@@ -4,5 +4,6 @@ export const images = {
   jswSteelWhiteLogo: '/assets/jsw-steel-white-logo.svg',
   homeIcon: '/assets/icons/Home.svg',
   calculatorIcon: '/assets/icons/calculator.svg',
-  tejasNameLogo:'/assets/Tejas-white-name.svg'
+  tejasNameLogo:'/assets/Tejas-white-name.svg',
+  sendArrowIcon:'/assets/icons/sendArrow.svg'
 }

@@ -2,7 +2,6 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import { useState } from 'react'
 import { images } from '../../utils/images'
 
-type ControlMode = 'manual' | 'auto'
 
 export function Navbar() {
   const [notifications, setNotifications] = useState(2)

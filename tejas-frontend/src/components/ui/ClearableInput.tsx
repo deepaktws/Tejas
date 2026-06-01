@@ -15,7 +15,7 @@ export function ClearableInput({ value, onChange, className = '', ...props }: Cl
         className={[
           'h-9 w-56 rounded-md border border-border-default bg-surface-card',
           'px-3 pr-8 text-sm text-text-primary placeholder:text-text-muted',
-          'focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20',
+          ' focus:outline-none',
           className,
         ]
           .filter(Boolean)

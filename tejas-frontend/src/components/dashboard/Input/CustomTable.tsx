@@ -1,9 +1,16 @@
 import { useMemo, useRef, useState } from "react";
-import { parseExcelFile } from "../../utils/parseExcelFile";
+import { parseExcelFile } from "../../../utils/parseExcelFile";
 
 interface CustomTableProps {
     title: string;
+    /** When set, the uploaded sheet must have at least one column whose header matches this pattern. */
+    requiredColumnPattern?: RegExp;
+    /** Shown in validation errors; defaults to "required column". */
+    requiredColumnLabel?: string;
 }
+
+const hasMatchingColumn = (columnNames: string[], pattern: RegExp) =>
+    columnNames.some((name) => pattern.test(name.trim()));
 
 const formatHeader = (key: string) =>
     key
@@ -11,7 +18,7 @@ const formatHeader = (key: string) =>
         .replace(/[_-]/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
 
-function CustomTable({ title }: CustomTableProps) {
+function CustomTable({ title, requiredColumnPattern, requiredColumnLabel }: CustomTableProps) {
     const [data, setData] = useState<Record<string, unknown>[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [uploadError, setUploadError] = useState<string | null>(null);
@@ -70,6 +77,17 @@ function CustomTable({ title }: CustomTableProps) {
                 return;
             }
 
+            if (requiredColumnPattern) {
+                const columnNames = Object.keys(parsedRows[0]);
+                if (!hasMatchingColumn(columnNames, requiredColumnPattern)) {
+                    const label = requiredColumnLabel ?? "required column";
+                    setUploadError(
+                        `The selected file must include a column for ${label}. Please check the header row and try again.`,
+                    );
+                    return;
+                }
+            }
+
             setData(parsedRows);
             setSearchTerm("");
         } catch {
@@ -101,9 +119,9 @@ function CustomTable({ title }: CustomTableProps) {
                         type="button"
                         onClick={handleUploadClick}
                         disabled={isParsing}
-                        className="rounded-lg border border-brand-primary bg-brand-primary px-4 py-2 text-sm font-medium text-zinc-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-md bg-[linear-gradient(174.84deg,#16A34A_29.64%,#083D1C_231.54%)] px-7 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {isParsing ? "Uploading..." : "Upload Excel"}
+                        {isParsing ? "Uploading..." : "UPLOAD DATA"}
                     </button>
                     {hasUploadedData && (
                         <button
@@ -112,7 +130,7 @@ function CustomTable({ title }: CustomTableProps) {
                             disabled={isParsing}
                             className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Remove Excel
+                            REMOVE DATA
                         </button>
                     )}
                 </div>

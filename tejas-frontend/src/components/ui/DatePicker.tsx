@@ -1,5 +1,5 @@
 import { useState } from "react";
-import CustomCalendar from "./CustomCalendar";
+import CustomCalendar from "../ui/CustomCalendar";
 
 function formatDate(date: Date): string {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -32,11 +32,11 @@ function DatePicker() {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       {/* Styled date trigger */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 text-brand-primary font-medium text-[15px] hover:opacity-80 transition-opacity"
+        className="flex items-center gap-1.5 text-brand-primary font-medium text-[15px] hover:text-brand-primary-dark transition-opacity cursor-pointer"
       >
         <span>{formatDate(date)}</span>
         <svg
