@@ -19,3 +19,5 @@ const createStorage = (folder: string) => {
 export const uploadHeatQueryAll = multer({
   storage: createStorage("heat-query-all"),
 });
+
+export const uploadGradeList = multer({ storage: createStorage("grade-list") });

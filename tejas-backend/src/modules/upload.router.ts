@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UploadController } from "./upload.controller";
-import { uploadHeatQueryAll } from "./upload.service";
+import { uploadHeatQueryAll, uploadGradeList } from "./upload.service";
 
 const UploadRouter = Router();
 const controller = new UploadController();
@@ -10,5 +10,7 @@ UploadRouter.post(
   uploadHeatQueryAll.single("file"),
   controller.uploadHeatQueryAll
 );
+
+UploadRouter.post("/grade-list", uploadGradeList.single("file"), controller.uploadGradeList);
 
 export default UploadRouter;
