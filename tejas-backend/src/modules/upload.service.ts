@@ -19,3 +19,5 @@ const createStorage = (folder: string) => {
 export const uploadHeatQueryAll = multer({
   storage: createStorage("heat-query-all"),
 });
+
+export const uploadScrapDataInventory = multer({ storage: createStorage("scrap-data-inventory") });
