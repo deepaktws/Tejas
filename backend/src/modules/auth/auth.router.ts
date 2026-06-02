@@ -15,6 +15,5 @@ protectedRouter.use(authenticateJWT);
 
 protectedRouter.post("/logout", authController.logout);
 
-authRouter.use(protectedRouter);
 
 export default authRouter;

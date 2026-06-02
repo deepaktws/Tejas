@@ -8,4 +8,9 @@ const loginService = async (email: string, password: string) => {
   return data;
 };
 
-export default loginService;
+const contactAdministratorService = async () => {
+  const { data } = await api.post('/auth/contact-administrator');
+  return data;
+};
+
+export { loginService, contactAdministratorService };

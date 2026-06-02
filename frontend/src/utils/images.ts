@@ -6,4 +6,5 @@ export const images = {
   eyeIcon: '/assets/icons/eye.svg',
   editIcon: '/assets/icons/edit.svg',
   deleteIcon: '/assets/icons/delete.svg',
+  tejasNameLogo:'/assets/Tejas-white-name.svg'
 }
