@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UploadController } from "./upload.controller";
-import { uploadHeatQueryAll } from "./upload.service";
+import { uploadHeatQueryAll, uploadScrapChem } from "./upload.service";
 
 const UploadRouter = Router();
 const controller = new UploadController();
@@ -10,5 +10,7 @@ UploadRouter.post(
   uploadHeatQueryAll.single("file"),
   controller.uploadHeatQueryAll
 );
+
+UploadRouter.post("/scrap-chem", uploadScrapChem.single("file"), controller.uploadScrapChem);
 
 export default UploadRouter;
