@@ -2,9 +2,8 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import { useState } from 'react'
 import { images } from '../../utils/images'
 
-type ControlMode = 'manual' | 'auto'
-
 export function Navbar() {
+  const [mode, setMode] = useState<'manual' | 'auto'>('manual')
   const [notifications, setNotifications] = useState(0)
   const [username, setUsername] = useState('Garvit Singhal ')
 
@@ -12,7 +11,7 @@ export function Navbar() {
     <header className="flex h-14 items-center justify-between bg-brand-primary pr-6 py-4">
       <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-8 object-contain " />
       <div className="flex items-center gap-5">
-        {/* <div
+        <div
           role="group"
           aria-label="Control mode"
           className="relative flex rounded-full bg-text-inverse p-1 "
@@ -49,7 +48,7 @@ export function Navbar() {
           >
             Auto
           </button>
-        </div> */}
+        </div>
 
         <button
           type="button"
