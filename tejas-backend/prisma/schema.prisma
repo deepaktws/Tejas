@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,54 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model grade {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+
+  created_at DateTime @default(now())
+  is_active  Boolean  @default(true)
+
+  heats       heat[]
+  grade_specs grade_spec[]
+}
+
+model grade_spec {
+  id         Int      @id @default(autoincrement())
+
+  grade_id   Int
+  element_id Int
+
+  min_val    Float?
+  max_val    Float?
+
+  created_at DateTime @default(now())
+  is_active  Boolean  @default(true)
+
+  grade   grade   @relation(fields: [grade_id], references: [id])
+  element element @relation(fields: [element_id], references: [id])
+
+  @@unique([grade_id, element_id])
+}
+
+model heat {
+  id         Int      @id @default(autoincrement())
+  heat_id    Int      @unique
+
+  grade_id   Int
+  grade      grade    @relation(fields: [grade_id], references: [id])
+
+  created_at DateTime @default(now())
+  is_active  Boolean  @default(true)
+}
+
+model element {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+
+  created_at  DateTime     @default(now())
+  is_active   Boolean      @default(true)
+
+  grade_specs grade_spec[]
 }

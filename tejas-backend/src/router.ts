@@ -1,5 +1,6 @@
 // src/routes.ts
 import { Router, Request, Response } from 'express';
+import GradeSpecRouter from './modules/grade_spec/gradespec.router';
 
 const apiRouter = Router();
 
@@ -11,4 +12,5 @@ apiRouter.get('/health', (req: Request, res: Response) => {
   });
 });
 
+apiRouter.use('/heat', GradeSpecRouter)
 export default apiRouter;
