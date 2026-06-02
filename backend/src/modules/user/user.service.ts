@@ -34,10 +34,6 @@ export class UserService {
     }
 
     async updateUser(id: string, requesterId: string, data: UpdateUserDto): Promise<SuccessResponseType<UserItem> | ErrorResponseType> {
-        if (id !== requesterId) {
-            return errorResponse(StatusMessages.FORBIDDEN, StatusCodes.FORBIDDEN);
-        }
-
         const user = await this.userRepository.findById(id);
         if (!user) {
             return errorResponse(StatusMessages.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
@@ -52,9 +48,6 @@ export class UserService {
     }
 
     async deleteUser(id: string, requesterId: string): Promise<SuccessResponseType | ErrorResponseType> {
-        if (id !== requesterId) {
-            return errorResponse(StatusMessages.FORBIDDEN, StatusCodes.FORBIDDEN);
-        }
 
         const user = await this.userRepository.findById(id);
         if (!user) {
