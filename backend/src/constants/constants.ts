@@ -38,6 +38,7 @@ export enum StatusCodes {
 export const StatusMessages = {
     SUCCESS: "Success",
     CREATED: "Created",
+    CONTACT_ADMINISTRATOR_SUCCESSFUL: "Your request has been sent",
 
     INVALID_CREDENTIALS: "Invalid credentials",
     INVALID_REFRESH_TOKEN: "Invalid refresh token",

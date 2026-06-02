@@ -7,6 +7,7 @@ const authController = new AuthController();
 
 authRouter.post("/login", authController.login);
 authRouter.post("/refresh", authController.refresh);
+authRouter.post("/contact-administrator", authController.contactAdministrator);
 
 const protectedRouter = Router();
 

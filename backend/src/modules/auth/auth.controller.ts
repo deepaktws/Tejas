@@ -39,4 +39,14 @@ export class AuthController {
             next(error);
         }
     }
+
+    // 4. contact administrator method
+    contactAdministrator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const result = await this.authService.contactAdministrator();
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
