@@ -1,27 +1,48 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { UploadType } from "../../constants/types";
+import { UploadRepository } from "./upload.repository";
 
-const createStorage = (folder: string) => {
-  const dest = path.join("tmp", "uploads", folder);
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
-  }
-  return multer.diskStorage({
+const uploadRepository = new UploadRepository();
+
+const dest = path.join("uploaded_files");
+if (!fs.existsSync(dest)) {
+  fs.mkdirSync(dest, { recursive: true });
+}
+
+export const upload = multer({
+  storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, dest),
     filename: (_req, file, cb) => {
       const unique = `${Date.now()}-${file.originalname}`;
       cb(null, unique);
     },
-  });
-};
-
-export const uploadHeatQueryAll = multer({
-  storage: createStorage("heat-query-all"),
+  }),
 });
 
-export const uploadGradeList = multer({ storage: createStorage("grade-list") });
-export const uploadScrapDataInventory = multer({ storage: createStorage("scrap-data-inventory") });
-export const uploadHeatQuerySchedule = multer({ storage: createStorage("heat-query-schedule") });
-export const uploadScrapChem = multer({ storage: createStorage("scrap-chem") });
-export const uploadHeatChem = multer({ storage: createStorage("heat-chem") });
+export class UploadService {
+  saveHeatQueryAll = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.heat_query_all);
+  };
+
+  saveGradeList = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.grade_list);
+  };
+
+  saveScrapDataInventory = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.scrap_data_inventory);
+  };
+
+  saveHeatQuerySchedule = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.heat_query_schedule);
+  };
+
+  saveScrapChem = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.scrap_chem);
+  };
+
+  saveHeatChem = async (filepath: string) => {
+    return uploadRepository.createUploadRecord(filepath, UploadType.heat_chem);
+  };
+}

@@ -1,21 +1,18 @@
 import { Router } from "express";
 import { UploadController } from "./upload.controller";
-import { uploadHeatQueryAll, uploadHeatQuerySchedule, uploadScrapChem, uploadScrapDataInventory, uploadGradeList, uploadHeatChem } from "./upload.service";
+import { upload } from "./upload.service";
 import { ROUTES } from "../../constants/route";
 
 const UploadRouter = Router();
 const controller = new UploadController();
 
-UploadRouter.post(
-  ROUTES.UPLOAD_HEAT_QUERY_ALL,
-  uploadHeatQueryAll.single("file"),
-  controller.uploadHeatQueryAll
-);
+UploadRouter.use(upload.single("file"));
 
-UploadRouter.post(ROUTES.UPLOAD_GRADE_LIST, uploadGradeList.single("file"), controller.uploadGradeList);
-UploadRouter.post(ROUTES.UPLOAD_SCRAP_DATA_INVENTORY, uploadScrapDataInventory.single("file"), controller.uploadScrapDataInventory);
-UploadRouter.post(ROUTES.UPLOAD_HEAT_QUERY_SCHEDULE, uploadHeatQuerySchedule.single("file"), controller.uploadHeatQuerySchedule);
-UploadRouter.post(ROUTES.UPLOAD_SCRAP_CHEM, uploadScrapChem.single("file"), controller.uploadScrapChem);
-UploadRouter.post(ROUTES.UPLOAD_HEAT_CHEM, uploadHeatChem.single("file"), controller.uploadHeatChem);
+UploadRouter.post(ROUTES.UPLOAD_HEAT_QUERY_ALL, controller.uploadHeatQueryAll);
+UploadRouter.post(ROUTES.UPLOAD_GRADE_LIST, controller.uploadGradeList);
+UploadRouter.post(ROUTES.UPLOAD_SCRAP_DATA_INVENTORY, controller.uploadScrapDataInventory);
+UploadRouter.post(ROUTES.UPLOAD_HEAT_QUERY_SCHEDULE, controller.uploadHeatQuerySchedule);
+UploadRouter.post(ROUTES.UPLOAD_SCRAP_CHEM, controller.uploadScrapChem);
+UploadRouter.post(ROUTES.UPLOAD_HEAT_CHEM, controller.uploadHeatChem);
 
 export default UploadRouter;
