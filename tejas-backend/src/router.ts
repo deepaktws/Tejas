@@ -1,6 +1,7 @@
 // src/routes.ts
 import { Router, Request, Response } from 'express';
 import UploadRouter from './modules/upload/upload.router';
+import ModelRouter from './modules/model/model.router';
 
 const apiRouter = Router();
 
@@ -13,5 +14,6 @@ apiRouter.get('/health', (req: Request, res: Response) => {
 });
 
 apiRouter.use("/upload", UploadRouter)
+apiRouter.use("/model", ModelRouter)
 
 export default apiRouter;
