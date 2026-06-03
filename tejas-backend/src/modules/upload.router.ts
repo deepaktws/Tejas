@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UploadController } from "./upload.controller";
-import { uploadHeatQueryAll, uploadHeatQuerySchedule, uploadScrapChem } from "./upload.service";
+import { uploadHeatQueryAll, uploadHeatQuerySchedule, uploadScrapChem, uploadScrapDataInventory } from "./upload.service";
 
 const UploadRouter = Router();
 const controller = new UploadController();
@@ -11,6 +11,7 @@ UploadRouter.post(
   controller.uploadHeatQueryAll
 );
 
+UploadRouter.post("/scrap-data-inventory", uploadScrapDataInventory.single("file"), controller.uploadScrapDataInventory);
 UploadRouter.post("/heat-query-schedule", uploadHeatQuerySchedule.single("file"), controller.uploadHeatQuerySchedule);
 UploadRouter.post("/scrap-chem", uploadScrapChem.single("file"), controller.uploadScrapChem);
 
