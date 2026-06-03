@@ -15,4 +15,9 @@ export class UploadController {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     return res.status(200).json({ message: "File uploaded successfully", filename: req.file.filename });
   };
+
+  uploadScrapChem = (req: Request & { file?: Express.Multer.File }, res: Response) => {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    return res.status(200).json({ message: "File uploaded successfully", filename: req.file.filename });
+  };
 }
