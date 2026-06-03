@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UploadController } from "./upload.controller";
-import { uploadHeatQueryAll, uploadHeatQuerySchedule, uploadScrapChem, uploadScrapDataInventory, uploadGradeList } from "./upload.service";
+import { uploadHeatQueryAll, uploadHeatQuerySchedule, uploadScrapChem, uploadScrapDataInventory, uploadGradeList, uploadHeatChem } from "./upload.service";
 import { ROUTES } from "../../constants/route";
 
 const UploadRouter = Router();
@@ -16,6 +16,6 @@ UploadRouter.post(ROUTES.UPLOAD_GRADE_LIST, uploadGradeList.single("file"), cont
 UploadRouter.post(ROUTES.UPLOAD_SCRAP_DATA_INVENTORY, uploadScrapDataInventory.single("file"), controller.uploadScrapDataInventory);
 UploadRouter.post(ROUTES.UPLOAD_HEAT_QUERY_SCHEDULE, uploadHeatQuerySchedule.single("file"), controller.uploadHeatQuerySchedule);
 UploadRouter.post(ROUTES.UPLOAD_SCRAP_CHEM, uploadScrapChem.single("file"), controller.uploadScrapChem);
-UploadRouter.post(ROUTES.UPLOAD_HEAT_CHEM, uploadScrapChem.single("file"), controller.uploadHeatChem);
+UploadRouter.post(ROUTES.UPLOAD_HEAT_CHEM, uploadHeatChem.single("file"), controller.uploadHeatChem);
 
 export default UploadRouter;
