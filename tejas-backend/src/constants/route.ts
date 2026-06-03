@@ -1,22 +1,16 @@
 // src/constants/routes.ts
 
-export const API_ROUTES = {
-  ROOT: "/api/v1",
-  HEALTH: "/health",
-} as const;
+export const ROUTES = {
+  API_ROOT: "/api/v1",
+  API_HEALTH: "/health",
 
-export const MODEL_ROUTES = {
-  ROOT: "/model",
+  MODEL_ROOT: "/model",
+  MODEL_RUN: "/run_model",
 
-  RUN_MODEL: "/run_model",
-} as const;
-
-export const UPLOAD_ROUTES = {
-  ROOT: "/upload",
-
-  HEAT_QUERY_ALL: "/heat-query-all",
-  GRADE_LIST: "/grade-list",
-  SCRAP_DATA_INVENTORY: "/scrap-data-inventory",
-  HEAT_QUERY_SCHEDULE: "/heat-query-schedule",
-  SCRAP_CHEM: "/scrap-chem",
+  UPLOAD_ROOT: "/upload",
+  UPLOAD_HEAT_QUERY_ALL: "/heat-query-all",
+  UPLOAD_GRADE_LIST: "/grade-list",
+  UPLOAD_SCRAP_DATA_INVENTORY: "/scrap-data-inventory",
+  UPLOAD_HEAT_QUERY_SCHEDULE: "/heat-query-schedule",
+  UPLOAD_SCRAP_CHEM: "/scrap-chem",
 } as const;
