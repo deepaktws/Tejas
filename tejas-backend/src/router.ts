@@ -1,6 +1,6 @@
 // src/routes.ts
 import { Router, Request, Response } from 'express';
-import UploadRouter from './modules/upload.router';
+import UploadRouter from './modules/upload/upload.router';
 
 const apiRouter = Router();
 
