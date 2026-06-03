@@ -1,5 +1,6 @@
 // src/routes.ts
 import { Router, Request, Response } from 'express';
+import UploadRouter from './modules/upload.router';
 
 const apiRouter = Router();
 
@@ -10,5 +11,7 @@ apiRouter.get('/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString() 
   });
 });
+
+apiRouter.use("/upload", UploadRouter)
 
 export default apiRouter;
