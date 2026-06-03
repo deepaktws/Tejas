@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma";
-import { UploadType } from "../../constants/types";
+import { FileType } from "../../constants/types";
 
 export class UploadRepository {
-  createUploadRecord = async (filepath: string, uploadType: UploadType) => {
+  createUploadRecord = async (filepath: string, uploadType: FileType) => {
     return prisma.data.create({
       data: {
         filepath,

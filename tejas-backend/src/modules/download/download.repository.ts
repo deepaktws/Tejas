@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma";
-import { UploadType } from "../../constants/types";
+import { FileType } from "../../constants/types";
 
 export class DownloadRepository {
-  getLatestByType = async (uploadType: UploadType) => {
+  getLatestByType = async (uploadType: FileType) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

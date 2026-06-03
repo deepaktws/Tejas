@@ -1,4 +1,4 @@
-export enum UploadType {
+export enum FileType {
   heat_query_all = "heat_query_all",
   heat_query_schedule = "heat_query_schedule",
   heat_chem = "heat_chem",

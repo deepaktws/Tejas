@@ -1,7 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { UploadType } from "../../constants/types";
+import { FileType } from "../../constants/types";
 import { UploadRepository } from "./upload.repository";
 
 const uploadRepository = new UploadRepository();
@@ -23,26 +23,26 @@ export const upload = multer({
 
 export class UploadService {
   saveHeatQueryAll = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.heat_query_all);
+    return await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all);
   };
 
   saveGradeList = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.grade_list);
+    return await uploadRepository.createUploadRecord(filepath, FileType.grade_list);
   };
 
   saveScrapDataInventory = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.scrap_data_inventory);
+    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_data_inventory);
   };
 
   saveHeatQuerySchedule = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.heat_query_schedule);
+    return await uploadRepository.createUploadRecord(filepath, FileType.heat_query_schedule);
   };
 
   saveScrapChem = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.scrap_chem);
+    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_chem);
   };
 
   saveHeatChem = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, UploadType.heat_chem);
+    return await uploadRepository.createUploadRecord(filepath, FileType.heat_chem);
   };
 }
