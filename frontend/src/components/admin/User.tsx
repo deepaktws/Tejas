@@ -2,6 +2,8 @@ import { toast } from 'react-toastify'
 import { usersData } from '../../staticData'
 import TabsWithButton from './Tabs'
 import { images } from '../../utils/images'
+import { useEffect, useState } from 'react'
+import { getUsers } from '../../service/user.service'
 
 const tableColumns = [
     'User Name',
@@ -41,6 +43,12 @@ function handleAddUser() {
 
 
 export default function User() {
+    const [users, setUsers] = useState<any[]>([])
+    useEffect(() => {
+        getUsers().then((data) => {
+            setUsers(data.body.data)
+        })
+    }, [])
     return (
         <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
             <TabsWithButton buttonText="Add User" onButtonClick={handleAddUser} />
@@ -60,7 +68,7 @@ export default function User() {
                         </tr>
                     </thead>
                     <tbody>
-                        {usersData.map((user, index) => (
+                        {users.map((user: any, index: number) => (
                             <tr
                                 key={user.id}
                                 className={
@@ -70,10 +78,11 @@ export default function User() {
                                 }
                             >
                                 <td className="px-4 py-3 text-center text-sm text-text-primary">
-                                    {user.userName}
+                                    {user.name}
                                 </td>
                                 <td className="px-4 py-3 text-center text-sm text-text-primary">
-                                    <CopyableCell value={user.email} />
+                                    {/* <CopyableCell value={user.email} /> */}
+                                    <CopyableCell value={user.userName} />
                                 </td>
                                 <td className="px-4 py-3 text-center text-sm text-text-primary">
                                     {user.designation}
@@ -82,17 +91,17 @@ export default function User() {
                                     <CopyableCell value={user.contact} />
                                 </td>
                                 <td className="px-4 py-3 text-center text-sm text-text-primary">
-                                    {user.role}
+                                    {user.userRoles.join(', ')}
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center justify-center gap-3">
-                                        <button
+                                        {/* <button
                                             type="button"
                                             aria-label={`View ${user.userName}`}
                                             className="text-brand-accent hover:opacity-80"
                                         >
                                             <img src={images.eyeIcon} alt="Eye" className="w-4 h-4" />
-                                        </button>
+                                        </button> */}
                                         <button
                                             type="button"
                                             aria-label={`Edit ${user.userName}`}

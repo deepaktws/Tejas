@@ -23,7 +23,7 @@ export class UserService {
         }
 
         const passwordHash = await hashPassword(dto.password);
-        const user = await this.userRepository.create({ ...dto, passwordHash, createdBy: requesterId ?? null });
+        const user = await this.userRepository.create({ ...dto, passwordHash, createdBy: requesterId ?? null, userRoles: dto.userRoles });
 
         return successResponse(StatusMessages.USER_CREATED, user as UserItem);
     }

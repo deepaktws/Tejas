@@ -12,7 +12,14 @@ export class UserRepository {
     async findById(id: string) {
         return prisma.user.findFirst({
             where: { id, deletedAt: null },
-            select: { id: true, userName: true, name: true },
+            select: {
+                id: true,
+                userName: true,
+                name: true,
+                designation: true,
+                contact: true,
+                userRoles: { select: { role: { select: { name: true } } } },
+            },
         });
     }
 
@@ -22,30 +29,66 @@ export class UserRepository {
             where,
             skip,
             take: limit,
-            select: { id: true, userName: true, name: true },
+            select: {
+                id: true,
+                userName: true,
+                name: true,
+                designation: true,
+                contact: true,
+                userRoles: { select: { role: { select: { name: true } } } },
+            },
         });
+        const formattedData = data.map((user) => ({
+            ...user,
+            userRoles: user.userRoles.map((ur) => ur.role.name),
+        }));
         const total = await prisma.user.count({ where });
-        return { data, total };
+        return { data: formattedData, total };
     }
 
-    async create(dto: CreateUserDto & { passwordHash: string, createdBy?: string | null }) {
-        return prisma.user.create({
+    async create(dto: CreateUserDto & { passwordHash: string, createdBy?: string | null, userRoles?: string[] }) {
+        const createdUser = await prisma.user.create({
             data: {
                 userName: dto.userName,
                 name: dto.name,
+                designation: dto.designation,
+                contact: dto.contact,
                 passwordHash: dto.passwordHash,
-                createdBy: dto.createdBy ?? null
+                createdBy: dto.createdBy ?? null,
+                userRoles: { create: dto.userRoles?.map((roleId) => ({ role: { connect: { id: roleId } } })) },
             },
-            select: { id: true, userName: true, name: true },
+            select: {
+                id: true,
+                userName: true,
+                name: true,
+                designation: true,
+                contact: true,
+                userRoles: { select: { role: { select: { name: true } } } },
+            },
         });
+        return {
+            ...createdUser,
+            userRoles: createdUser.userRoles.map((ur) => ur.role.name),
+        };
     }
 
     async update(id: string, data: { name?: string; passwordHash?: string; updatedBy: string }) {
-        return prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id },
             data,
-            select: { id: true, userName: true, name: true },
+            select: {
+                id: true,
+                userName: true,
+                name: true,
+                designation: true,
+                contact: true,
+                userRoles: { select: { role: { select: { name: true } } } },
+            },
         });
+        return {
+            ...updatedUser,
+            userRoles: updatedUser.userRoles.map((ur) => ur.role.name),
+        };
     }
 
     async softDelete(id: string, deletedBy: string) {
