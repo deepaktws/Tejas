@@ -16,5 +16,6 @@ UploadRouter.post(ROUTES.UPLOAD_GRADE_LIST, uploadGradeList.single("file"), cont
 UploadRouter.post(ROUTES.UPLOAD_SCRAP_DATA_INVENTORY, uploadScrapDataInventory.single("file"), controller.uploadScrapDataInventory);
 UploadRouter.post(ROUTES.UPLOAD_HEAT_QUERY_SCHEDULE, uploadHeatQuerySchedule.single("file"), controller.uploadHeatQuerySchedule);
 UploadRouter.post(ROUTES.UPLOAD_SCRAP_CHEM, uploadScrapChem.single("file"), controller.uploadScrapChem);
+UploadRouter.post(ROUTES.UPLOAD_HEAT_CHEM, uploadScrapChem.single("file"), controller.uploadHeatChem);
 
 export default UploadRouter;

@@ -50,4 +50,14 @@ export class UploadController {
       filename: req.file!.filename,
     });
   };
+
+  uploadHeatChem = (
+    req: Request & { file?: Express.Multer.File },
+    res: Response
+  ) => {
+    return res.status(200).json({
+      message: "File uploaded successfully",
+      filename: req.file!.filename,
+    });
+  };
 }

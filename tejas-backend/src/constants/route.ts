@@ -13,4 +13,5 @@ export const ROUTES = {
   UPLOAD_SCRAP_DATA_INVENTORY: "/scrap-data-inventory",
   UPLOAD_HEAT_QUERY_SCHEDULE: "/heat-query-schedule",
   UPLOAD_SCRAP_CHEM: "/scrap-chem",
+  UPLOAD_HEAT_CHEM: "/heat-chem"
 } as const;
