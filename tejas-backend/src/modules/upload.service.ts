@@ -20,4 +20,5 @@ export const uploadHeatQueryAll = multer({
   storage: createStorage("heat-query-all"),
 });
 
+export const uploadHeatQuerySchedule = multer({ storage: createStorage("heat-query-schedule") });
 export const uploadScrapChem = multer({ storage: createStorage("scrap-chem") });
