@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scrap Chemistry Prediction Tool</title>
+    <style>
+        body {
+            margin: 40px 60px;
+            background-image: url("{{ url_for('static', filename='jsw_background.jpg') }}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+        }
+
+        /* Optional: improve readability */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* dark overlay */
+            z-index: -1;
+        }
+        /* button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        } */
+
+        button {
+        padding: 8px 15px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        font-size: 13px;
+        transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+
+        #runModelBtn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        #runRecoBtn:not(:disabled) {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* -----------------------------
+        Layout container
+        ----------------------------- */
+        .main-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 60px 80px;
+        }
+
+        /* -----------------------------
+        Card UI
+        ----------------------------- */
+        .card {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 25px 30px;
+            border-radius: 10px;
+            width: 720px;
+            min-height: 520px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        /* -----------------------------
+        Headings
+        ----------------------------- */
+        h2 {
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .main-title {
+        font-size: 28px;
+        font-weight: 500;
+        color: #f5f5f5;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-style: oblique;
+        }
+
+        h3 {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #f1f1f1;
+        }
+
+        /* -----------------------------
+        Labels & Inputs
+        ----------------------------- */
+        label {
+            font-size: 13px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        input, select {
+            /* width: 100%; */
+            width: 180px;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        /* -----------------------------
+        Status Messages
+        ----------------------------- */
+        #statusText {
+            font-size: 18px;
+            color: #ffffff;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        #fileName {
+            font-size: 16px;
+            color: #2ecc71;
+            margin-top: 8px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        #big-message {
+            font-size: 28px;   /* adjust as needed */
+            font-weight: bold;
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+
+<!-- <div class="main-container"> -->
+<!-- <div class="card"> -->
+
+<!-- <h2>Scrap Chemistry Prediction Tool</h2> -->
+
+<h1 class="main-title">Scrap Chemistry Prediction Tool</h1>
+
+<!-- Upload -->
+<!-- <input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button> -->
+
+<!-- Upload file comes below because of this line -->
+<!-- <input type="file" id="fileInput">
+<button onclick="handleUpload()">Upload File</button> -->
+
+<div style="display:flex; align-items:center; gap:10px;">
+    <input type="file" id="fileInput" style="font-size:13px;">
+    <!-- <button onclick="handleUpload()">Upload File</button> -->
+    <button onclick="handleUpload()" style="padding:5px 10px; font-size:13px;">
+        Upload File
+    </button>
+</div>
+
+<p id="statusText"></p>
+<p id="fileName"></p>
+
+<input type="file" id="recoFileInput" style="display:none" onchange="uploadRecoFile()">
+
+<h3>Select Parameters</h3>
+
+<!-- <label>Target Chem:</label>
+<select id="targetChem" onchange="resetState()">
+    <option value="Cu">Cu</option>
+    <option value="Cr">Cr</option>
+    <option value="Ni">Ni</option>
+    <option value="Sn">Sn</option>
+    <option value="P">P</option>
+</select> -->
+
+<div style="margin-bottom:10px;">
+    <label>Target Chem:</label>
+    <select id="targetChem" onchange="resetState()">
+        <option value="ALL">ALL</option>
+        <option value="Cu">Cu</option>
+        <option value="Cr">Cr</option>
+        <option value="Ni">Ni</option>
+        <option value="Sn">Sn</option>
+        <option value="P">P</option>
+        <!-- <option value="ALL">ALL</option> -->
+    </select>
+</div>
+
+<!-- <br><br> -->
+
+<label>Number of Heats Pass:</label>
+<input type="number" id="nHeats" value="1">
+
+<!-- <br><br> -->
+
+<!-- Run -->
+<!-- <button onclick="runKF()">Run Model</button>
+
+<!-- Buttons -->
+<div style="margin-top: 10px;">
+    <button onclick="runKF()" id="runModelBtn">Run</button>
+
+    <button 
+        id="runRecoBtn" 
+        onclick="runRecommendation()" 
+        title="Re-run recommendation only (uses existing KF outputs)"
+        style="margin-left: 10px;"
+    >
+        Re-run Recommendation
+    </button>
+</div>
+
+<p id="status"></p>
+
+<div id="outputTables" style="margin-top:20px;"></div>
+
+<script>
+
+let isFileUploaded = false; 
+
+let uploadedFiles = {
+    all_file: null,
+    chem_file: null
+};
+
+let uploadStep = 1;
+
+function handleUpload() {
+    let fileInput = document.getElementById("fileInput");
+    let file = fileInput.files[0];
+
+    if (!file) {
+        // show instruction based on step
+        if (uploadStep === 1) {
+            document.getElementById("statusText").innerText =
+                "Please choose HeatQuery_All file";
+        } else {
+            document.getElementById("statusText").innerText =
+                "Please choose HeatQuery_Chemistry file";
+        }
+        return;
+    }
+
+    let fileName = file.name;
+
+    // Validate file extension
+    // let validExt = fileName.endsWith(".xlsx") || fileName.endsWith(".csv");
+    let lowerFileName = fileName.toLowerCase();
+
+
+    let validExt =
+       lowerFileName.endsWith(".xlsx") ||
+       lowerFileName.endsWith(".csv");
+
+    if (!validExt) {
+        alert("Only .xlsx or .csv files are allowed.\n\n" +
+        "Detected file: " + fileName);
+        return;
+    }
+
+    // STEP 1 → ALL FILE
+    if (uploadStep === 1) {
+
+        if (!lowerFileName.startsWith("heatquery_all_"))  {
+            alert("Please upload file starting with HeatQuery_All_.. file (.xlsx or .csv)");
+            return;
+        }
+
+        uploadedFiles.all_file = file;
+
+        // ✅ ADD THIS LINE (SHOW FIRST FILE NAME)
+        document.getElementById("fileName").innerText =
+        "Selected:\n" + uploadedFiles.all_file.name;
+
+        uploadStep = 2;
+
+        document.getElementById("statusText").innerText =
+            "Now choose HeatQuery_Chemistry_.. file (.xlsx or .csv) and click Upload";
+
+        fileInput.value = "";
+        return;
+    }
+
+    // STEP 2 → CHEM FILE
+    if (uploadStep === 2) {
+
+        if (!lowerFileName.startsWith("heatquery_chemistry_")) {
+            alert("Please upload file starting with HeatQuery_Chemistry_");
+            return;
+        }
+
+        uploadedFiles.chem_file = file;
+
+        // SEND BOTH FILES
+        let formData = new FormData();
+        formData.append("file1", uploadedFiles.all_file);
+        formData.append("file2", uploadedFiles.chem_file);
+
+        fetch("/upload", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                document.getElementById("fileName").innerText =
+                    "Uploaded:\n" +
+                    uploadedFiles.all_file.name + "\n" +
+                    uploadedFiles.chem_file.name;
+
+                document.getElementById("statusText").innerText =
+                    "Files uploaded successfully ✅";
+
+                isFileUploaded = true;
+            } else {
+                alert(data.message);
+            }
+        });
+
+        uploadStep = 1;
+        fileInput.value = "";
+    }
+}
+
+function downloadOutputFile(outputFile) {
+    if (!outputFile || !outputFile.content_base64) return;
+
+    const byteChars = atob(outputFile.content_base64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+    const blob = new Blob([new Uint8Array(byteNumbers)], { type: outputFile.mime_type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = outputFile.filename || "Scrap_Optimization_Output.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
+function renderRecommendationResults(data) {
+    let scrapData = data.scrap_table || [];
+    let chemData = data.chem_table || [];
+
+    if (scrapData.length === 0) {
+        document.getElementById("status").innerHTML =
+            "<span style='color:#e74c3c'>No Solution Found ❌</span>";
+        document.getElementById("outputTables").innerHTML = "";
+        return;
+    }
+
+    if (scrapData.length > 0 && scrapData[0].Result === "No Solution Found") {
+        document.getElementById("status").innerHTML =
+            "<span style='color:#e74c3c'>No Solution Found ❌</span>";
+        document.getElementById("outputTables").innerHTML = "";
+        return;
+    }
+
+    document.getElementById("status").innerHTML =
+        "<span style='color:#2ecc71'>" + (data.message || "Completed") + " ✅</span>";
+
+    let html = "";
+
+    if (data.output_filename) {
+        html += `<p style="margin-bottom:12px;"><b>Output file:</b> ${data.output_filename}</p>`;
+    }
+
+    if (scrapData.length > 0) {
+        html += "<h3>Scrap Mix</h3>";
+        html += `<table style='border-collapse:collapse;width:60%;background:white;color:black;margin-bottom:20px;'>`;
+
+        const scrapColumns = [
+            "Scrap Type",
+            "Suggested Quantity Used (Pounds)",
+            "Actual Quantity Used (Pounds)",
+            "Cost per Pound"
+        ];
+
+        html += "<tr>";
+        scrapColumns.forEach(col => {
+            html += `<th style="border:1px solid black;padding:6px;">${col}</th>`;
+        });
+        html += "</tr>";
+
+        scrapData.forEach(row => {
+            html += "<tr>";
+            scrapColumns.forEach(col => {
+                html += `<td style="border:1px solid black;padding:6px;">${row[col] ?? ""}</td>`;
+            });
+            html += "</tr>";
+        });
+        html += "</table>";
+    }
+
+    if (data.actual_cost !== undefined && data.actual_cost !== null) {
+        const formatCurrency = (val) => Number(val).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        const actual = Number(data.actual_cost);
+        const suggested = Number(data.suggested_cost);
+        const diff = actual - suggested;
+        const actualFormatted = formatCurrency(actual);
+        const suggestedFormatted = formatCurrency(suggested);
+        const diffFormatted = formatCurrency(Math.abs(diff));
+
+        let diffHtml = "";
+        if (diff > 0) {
+            diffHtml = `<p style="color:#4CAF50;"><b>Difference:</b> 🔺 ${diffFormatted} $</p>`;
+        } else if (diff < 0) {
+            diffHtml = `<p style="color:#f44336;"><b>Difference:</b> 🔻 ${diffFormatted} $</p>`;
+        } else {
+            diffHtml = `<p><b>Difference:</b> 0.00 $</p>`;
+        }
+
+        html += `
+            <p style="margin-top:20px;"><b>The Actual Cost of the Scraps Used:</b> ${actualFormatted} $</p>
+            <p><b>The Suggested Cost After Optimization:</b> ${suggestedFormatted} $</p>
+            ${diffHtml}
+        `;
+    }
+
+    if (chemData.length > 0) {
+        html += "<h3>Chemistry</h3>";
+        html += `<table style='border-collapse:collapse;width:60%;background:white;color:black;'>`;
+        html += "<tr>";
+        Object.keys(chemData[0]).forEach(col => {
+            html += `<th style="border:1px solid black;padding:6px;">${col}</th>`;
+        });
+        html += "</tr>";
+
+        chemData.forEach(row => {
+            html += "<tr>";
+            Object.values(row).forEach(val => {
+                html += `<td style="border:1px solid black;padding:6px;">${val}</td>`;
+            });
+            html += "</tr>";
+        });
+        html += "</table>";
+    }
+
+    document.getElementById("outputTables").innerHTML = html;
+}
+
+function runKF() {
+
+    if (!isFileUploaded) {
+        alert("Please click 'Upload' after selecting the file");
+        return;
+    }
+
+    let targetChem = document.getElementById("targetChem").value;
+    let nHeats = document.getElementById("nHeats").value;
+
+    document.getElementById("status").innerText = "Running Kalman + Recommendation...";
+    document.getElementById("outputTables").innerHTML = "";
+
+    document.getElementById("runModelBtn").disabled = true;
+    document.getElementById("runRecoBtn").disabled = true;
+
+    fetch("/run", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            target_chem: targetChem,
+            numb_heats_pass: nHeats,
+            return_format: "both"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("runModelBtn").disabled = false;
+        document.getElementById("runRecoBtn").disabled = false;
+
+        if (data.success) {
+            renderRecommendationResults(data);
+            if (data.output_file) {
+                downloadOutputFile(data.output_file);
+            }
+        } else {
+            const phase = data.phase ? ` (${data.phase})` : "";
+            document.getElementById("status").innerHTML =
+                "<span style='color:#e74c3c'>Error ❌" + phase + ": " + data.message + "</span>";
+        }
+    })
+    .catch(err => {
+        document.getElementById("runModelBtn").disabled = false;
+        document.getElementById("runRecoBtn").disabled = false;
+        document.getElementById("status").innerHTML =
+            "<span style='color:#e74c3c'>Error ❌: " + (err.message || err) + "</span>";
+    });
+}
+
+function runRecommendation() {
+
+    let formData = new FormData();
+
+    let targetChem = document.getElementById("targetChem").value;
+    formData.append("target_chem", targetChem);
+
+    let nHeats = document.getElementById("nHeats").value;
+    formData.append("numb_heats_pass", nHeats);
+    formData.append("return_format", "both");
+
+    document.getElementById("status").innerText = "Running Recommendation...";
+
+    document.getElementById("runModelBtn").disabled = true;
+    document.getElementById("runRecoBtn").disabled = true;
+
+    fetch("/run_recommendation", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        document.getElementById("runModelBtn").disabled = false;
+        document.getElementById("runRecoBtn").disabled = false;
+
+        if (data.success) {
+            renderRecommendationResults(data);
+            if (data.output_file) {
+                downloadOutputFile(data.output_file);
+            }
+        } else {
+            document.getElementById("status").innerText = "Error ❌: " + data.message;
+        }
+
+    })
+    .catch(err => {
+
+        document.getElementById("runModelBtn").disabled = false;
+        document.getElementById("runRecoBtn").disabled = false;
+
+        document.getElementById("status").innerText =
+            "Error ❌: " + (err.message || err);
+    });
+}
+
+// function uploadRecoFile() {
+//     let fileInput = document.getElementById("recoFileInput");
+//     let file = fileInput.files[0];
+
+//     if (!file) {
+//         alert("Please select a file");
+//         return;
+//     }
+
+//     let formData = new FormData();
+//     formData.append("file", file);
+
+//     let targetChem = document.getElementById("targetChem").value;
+//     formData.append("target_chem", targetChem);
+
+//     document.getElementById("status").innerText = "Running Recommendation...";
+
+//     fetch("/run_recommendation", {
+//         method: "POST",
+//         body: formData
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.success) {
+//             document.getElementById("status").innerText = data.message;
+//         } else {
+//             document.getElementById("status").innerText = "Error ❌: " + data.message;
+//         }
+
+//         //IMPORTANT FIX (ADD THIS)
+//         fileInput.value = "";   // <-- THIS LINE FIXES YOUR ISSUE
+//     })
+//     .catch(err => {
+//         document.getElementById("status").innerText = "Error ❌: " + (err.message || err);
+
+//         //ALSO RESET ON ERROR
+//         fileInput.value = "";
+//     });
+// }
+
+function uploadRecoFile() {
+    let fileInput = document.getElementById("recoFileInput");
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a file");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    let targetChem = document.getElementById("targetChem").value;
+    formData.append("target_chem", targetChem);
+
+    let nHeats = document.getElementById("nHeats").value;
+    formData.append("numb_heats_pass", nHeats);
+
+    document.getElementById("status").innerText = "Running Recommendation...";
+
+    fetch("/run_recommendation", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("status").innerText = data.message;
+
+            // ===============================
+            // 🔥 ADD TABLE RENDERING
+            // ===============================
+            let scrapData = data.scrap_table || [];
+            let chemData = data.chem_table || [];
+
+            // 🔥 HANDLE "NO SOLUTION FOUND"
+            if (scrapData.length > 0 && scrapData[0].Result === "No Solution Found") {
+                document.getElementById("status").innerText = "No Solution Found ❌";
+                document.getElementById("status").style.color = "red";
+
+                // Clear any previous tables
+                document.getElementById("outputTables").innerHTML = "";
+            } 
+            else {
+                document.getElementById("status").innerText = data.message;
+                document.getElementById("status").style.color = "white";
+
+                let html = "";
+
+                // ===== Scrap Mix Table =====
+                if (scrapData.length > 0) {
+                    html += "<h3>Scrap Mix</h3>";
+                    html += "<table style='border-collapse:collapse; width:60%; background:white; color:black; margin-bottom:20px;'>";
+                    
+                    const scrapColumns = ["Scrap Type", "Suggested Quantity Used (Pounds)", "Actual Quantity Used (Pounds)", "Cost per Pound"];
+                    html += "<tr>";
+                    // Object.keys(scrapData[0]).forEach(col => {
+                    //     html += `<th style="border:1px solid black; padding:6px;">${col}</th>`;
+                    scrapColumns.forEach(col => {html += `<th style="border:1px solid black; padding:6px;">${col}</th>`;
+                    });
+                    html += "</tr>";
+
+                    scrapData.forEach(row => {
+                        html += "<tr>";
+                        // Object.values(row).forEach(val => {
+                        //     html += `<td style="border:1px solid black; padding:6px;">${val}</td>`;
+                        scrapColumns.forEach(col => {html += `<td style="border:1px solid black; padding:6px;">${row[col]}</td>`;
+                        });
+                        html += "</tr>";
+                    });
+
+                    html += "</table>";
+                }
+
+                // # ADDED HERE
+                // if (data.actual_cost !== undefined) {
+                //     html += `<p style="margin-top:20px;"><b>Actual Cost:</b> $${data.actual_cost}</p>`;
+                //     html += `<p><b>Suggested Cost:</b> $${data.suggested_cost}</p>`;
+                // }
+                if (data.actual_cost !== undefined) {
+
+                    const formatCurrency = (val) => Number(val).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    const actual = Number(data.actual_cost);
+                    const suggested = Number(data.suggested_cost);
+                    const diff = actual - suggested;
+
+                    const actualFormatted = formatCurrency(actual);
+                    const suggestedFormatted = formatCurrency(suggested);
+                    const diffFormatted = formatCurrency(Math.abs(diff));
+
+                    // Decide icon + color
+                    let diffHtml = "";
+
+                    if (diff > 0) {
+                        diffHtml = `<p style="color:#4CAF50;">
+                                        <b>Difference:</b> 🔺 ${diffFormatted} $
+                                    </p>`;
+                    } else if (diff < 0) {
+                        diffHtml = `<p style="color:#f44336;">
+                                        <b>Difference:</b> 🔻 ${diffFormatted} $
+                                    </p>`;
+                    } else {
+                        diffHtml = `<p>
+                                        <b>Difference:</b> 0.00 $
+                                    </p>`;
+                    }
+
+                    html += `
+                        <p style="margin-top:20px;"><b>The Actual Cost of the Scraps Used:</b> ${actualFormatted} $</p>
+                        <p><b>The Suggested Cost After Optimization:</b> ${suggestedFormatted} $</p>
+                        ${diffHtml}
+                    `;
+                }
+
+                // ===== Chemistry Table =====
+                if (chemData.length > 0) {
+                    html += "<h3>Chemistry</h3>";
+                    html += "<table style='border-collapse:collapse; width:60%; background:white; color:black;'>";
+
+                    html += "<tr>";
+                    Object.keys(chemData[0]).forEach(col => {
+                        html += `<th style="border:1px solid black; padding:6px;">${col}</th>`;
+                    });
+                    html += "</tr>";
+
+                    chemData.forEach(row => {
+                        html += "<tr>";
+                        Object.values(row).forEach(val => {
+                            html += `<td style="border:1px solid black; padding:6px;">${val}</td>`;
+                        });
+                        html += "</tr>";
+                    });
+
+                    html += "</table>";
+                }
+
+                document.getElementById("outputTables").innerHTML = html;
+
+            } 
+        } else {
+            document.getElementById("status").innerText = "Error ❌: " + data.message;
+        }
+
+        // Reset file input
+        fileInput.value = "";
+    })
+    .catch(err => {
+        document.getElementById("status").innerText = "Error ❌: " + (err.message || err);
+
+        // Reset on error
+        fileInput.value = "";
+    });
+}
+</script>
+
+<!-- </div>
+</div> -->
+
+</body>
+</html>
