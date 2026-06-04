@@ -22,7 +22,7 @@ function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInp
       <label
         htmlFor={disabled ? undefined : inputId}
         className={[
-          'flex min-w-[200px] flex-row items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-2',
+          'flex w-[200px] flex-row items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-2',
           disabled
             ? 'cursor-not-allowed border-border-default opacity-60'
             : 'cursor-pointer border-border-default bg-surface-card hover:border-brand-accent',
@@ -40,7 +40,7 @@ function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInp
             disabled={disabled}
             onChange={handleInputChange}
           />
-          <p className="mt-2 max-w-[180px] truncate text-xs text-text-primary">
+          <p className="mt-2 max-w-[120px] truncate text-xs text-text-primary">
             {file?.name ?? 'No file chosen'}
           </p>
         </div>
