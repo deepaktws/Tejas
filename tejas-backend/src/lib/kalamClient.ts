@@ -1,5 +1,7 @@
 import fs from "fs";
+import path from "path";
 import FormData from "form-data";
+import axios from "axios";
 
 const FLASK_BASE_URL = process.env.FLASK_BASE_URL ?? "http://127.0.0.1:5000";
 
@@ -12,31 +14,35 @@ export const sendToModel = async (
 ) => {
   // step 1 - upload both files
   const formData = new FormData();
-  formData.append("file1", fs.createReadStream(heatQueryAllPath));
-  formData.append("file2", fs.createReadStream(heatChemPath));
+  formData.append("file1", fs.createReadStream(heatQueryAllPath), path.basename(heatQueryAllPath).replace(/^\d+-/, ""));
+  formData.append("file2", fs.createReadStream(heatChemPath), path.basename(heatChemPath).replace(/^\d+-/, ""));
 
-  const uploadRes = await fetch(`${FLASK_BASE_URL}/upload`, {
-    method: "POST",
-    body: formData as any,
+  const uploadRes = await axios.post(`${FLASK_BASE_URL}/upload`, formData, {
     headers: formData.getHeaders(),
   });
 
-  const uploadData = await uploadRes.json() as { success: boolean; message: string };
-
-  if (!uploadData.success) {
-    throw new Error(`Flask upload failed: ${uploadData.message}`);
+  if (!uploadRes.data.success) {
+    throw new Error(`Flask upload failed: ${uploadRes.data.message}`);
   }
 
   // step 2 - trigger model run
-  const runRes = await fetch(`${FLASK_BASE_URL}/run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      target_chem: targetChem,
-      numb_heats_pass: numbHeatPass,
-      return_format: returnFormat,
-    }),
+  const runRes = await axios.post(`${FLASK_BASE_URL}/run`, {
+    target_chem: targetChem,
+    numb_heats_pass: numbHeatPass,
+    return_format: returnFormat,
+  }, {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    timeout: 120000,
+    validateStatus: () => true,
   });
 
-  return await runRes.json();
+  console.log("Flask /run status:", runRes.status);
+  console.log("Flask /run response:", JSON.stringify(runRes.data, null, 2));
+
+  if (runRes.status !== 200) {
+    throw new Error(`Flask /run failed: ${JSON.stringify(runRes.data)}`);
+  }
+
+  return runRes.data;
 };
