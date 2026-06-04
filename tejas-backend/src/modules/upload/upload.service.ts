@@ -29,7 +29,8 @@ export class UploadService {
     if (pairedId) {
       const paired = await uploadRepository.getById(pairedId);
       if (!paired) throw new Error("Paired file record not found");
-      await sendToModel(record.filepath, paired.filepath);
+      const modelResult=await sendToModel(record.filepath, paired.filepath);
+      return { record, modelResult };
     }
 
     return record;
@@ -57,7 +58,8 @@ export class UploadService {
     if (pairedId) {
       const paired = await uploadRepository.getById(pairedId);
       if (!paired) throw new Error("Paired file record not found");
-      await sendToModel(paired.filepath, record.filepath);
+      const modelResult=await sendToModel(record.filepath, paired.filepath);
+      return { record, modelResult };
     }
 
     return record;
