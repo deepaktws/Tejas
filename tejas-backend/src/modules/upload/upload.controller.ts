@@ -8,7 +8,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveHeatQueryAll(req.file!.path);
+    const { pairedId } = req.body;
+    const record = await uploadService.saveHeatQueryAll(req.file!.path, pairedId ? Number(pairedId) : undefined);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -48,7 +49,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveHeatChem(req.file!.path);
+    const { pairedId } = req.body;
+    const record = await uploadService.saveHeatChem(req.file!.path, pairedId ? Number(pairedId) : undefined);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 }

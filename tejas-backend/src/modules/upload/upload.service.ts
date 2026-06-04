@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { FileType } from "../../constants/types";
 import { UploadRepository } from "./upload.repository";
+import { sendToModel } from "../../lib/kalamClient";
 
 const uploadRepository = new UploadRepository();
 
@@ -22,8 +23,17 @@ export const upload = multer({
 });
 
 export class UploadService {
-  saveHeatQueryAll = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all);
+  saveHeatQueryAll = async (filepath: string, pairedId?: number) => {
+    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all);
+
+    if (pairedId) {
+      const paired = await uploadRepository.getById(pairedId);
+      if (!paired) throw new Error("Paired file record not found");
+      const modelResult=await sendToModel(record.filepath, paired.filepath);
+      return { record, modelResult };
+    }
+
+    return record;
   };
 
   saveGradeList = async (filepath: string) => {
@@ -42,7 +52,16 @@ export class UploadService {
     return await uploadRepository.createUploadRecord(filepath, FileType.scrap_chem);
   };
 
-  saveHeatChem = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.heat_chem);
+  saveHeatChem = async (filepath: string, pairedId?: number) => {
+    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_chem);
+
+    if (pairedId) {
+      const paired = await uploadRepository.getById(pairedId);
+      if (!paired) throw new Error("Paired file record not found");
+      const modelResult=await sendToModel(record.filepath, paired.filepath);
+      return { record, modelResult };
+    }
+
+    return record;
   };
 }
