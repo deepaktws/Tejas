@@ -10,4 +10,10 @@ export class UploadRepository {
       },
     });
   };
+
+  getById = async (id: number) => {
+    return prisma.data.findUnique({
+      where: { id },
+    });
+  };
 }
