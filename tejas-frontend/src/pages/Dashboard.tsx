@@ -1,13 +1,12 @@
-import { Outlet } from "react-router-dom";
 import { Navbar } from "../components/dashboard/Navbar";
-import Tabs from "../components/dashboard/Tabs";
-import DatePicker from "../components/dashboard/DatePicker";
+import UploadFile from "./UploadFile";
 export default function Dashboard() {
   return (
     <div>
       <Navbar />
-      <Tabs rightComponent={<DatePicker />}/>
-      <Outlet />
+      {/* <Tabs rightComponent={<DatePicker />}/>
+      <Outlet /> */}
+      <UploadFile />
     </div>
   );
 }

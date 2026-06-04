@@ -10,14 +10,14 @@ export function Navbar() {
   const [mode, setMode] = useState<'manual' | 'auto'>('manual')
 
   return (
-    <header className="flex h-14 items-center justify-between bg-brand-primary px-6 py-4">
-      <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 mr-4 object-contain rounded-lg" />
-      <div className="flex items-center">
+    <header className="flex h-14 items-center justify-between bg-brand-primary px-4 py-4">
+      <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 object-contain rounded-lg" />
+      <div className="flex items-center mr-20">
         <img src={images.tejasLogo} alt="Tejas Logo" className="w-15 h-10 object-contain" />
         <img src={images.tejasNameLogo} alt="Tejas Name Logo" className="w-30 h-10 object-contain" />
       </div>
       <div className="flex items-center gap-5">
-         <div
+         {/* <div
           role="group"
           aria-label="Control mode"
           className="relative flex rounded-full bg-text-inverse p-1 "
@@ -54,9 +54,9 @@ export function Navbar() {
           >
             Auto
           </button>
-        </div> 
+        </div>  */}
 
-        <button
+        {/* <button
           type="button"
           aria-label="Notifications"
           className="relative flex items-center justify-center text-text-inverse"
@@ -68,7 +68,7 @@ export function Navbar() {
               aria-hidden
             />
           )}
-        </button>
+        </button> */}
 
         <div
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-text-inverse text-sm font-semibold text-brand-primary"
