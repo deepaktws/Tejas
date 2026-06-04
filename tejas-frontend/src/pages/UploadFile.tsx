@@ -3,9 +3,13 @@ import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined'
 import { useMemo, useState } from 'react'
 import { UploadSidebar } from '../components/upload/UploadSidebar'
 import { UploadStep } from '../components/upload/UploadStep'
-import { UPLOAD_STEPS } from '../components/upload/uploadStepsConfig'
-
-type StepFiles = Record<string, File | null>
+import {
+  UPLOAD_STEPS,
+  areRequiredFilesUploaded,
+  createEmptyStepFiles,
+  getFileSlotIds,
+  isStepEnabled,
+} from '../components/upload/uploadStepsConfig'
 
 function formatYesterdayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -16,9 +20,7 @@ function formatYesterdayLabel(date: Date): string {
 }
 
 function UploadFile() {
-  const [stepFiles, setStepFiles] = useState<StepFiles>(() =>
-    Object.fromEntries(UPLOAD_STEPS.map((step) => [step.id, null])),
-  )
+  const [stepFiles, setStepFiles] = useState(createEmptyStepFiles)
 
   const yesterdayLabel = useMemo(() => {
     const yesterday = new Date()
@@ -26,29 +28,16 @@ function UploadFile() {
     return formatYesterdayLabel(yesterday)
   }, [])
 
-  const isStepEnabled = (stepNumber: number): boolean => {
-    if (stepNumber === 1) return true
-    const previousStep = UPLOAD_STEPS.find((s) => s.stepNumber === stepNumber - 1)
-    return previousStep ? stepFiles[previousStep.id] !== null : false
-  }
+  const requiredStepsUploaded = areRequiredFilesUploaded(stepFiles)
 
-  const requiredStepsUploaded = UPLOAD_STEPS.filter((s) => !s.optional).every(
-    (step) => stepFiles[step.id] !== null,
-  )
-
-  const handleFileSelect = (stepId: string, file: File | null) => {
-    setStepFiles((prev) => ({ ...prev, [stepId]: file }))
+  const handleFileSelect = (slotId: string, file: File | null) => {
+    setStepFiles((prev) => ({ ...prev, [slotId]: file }))
   }
 
   const handleRunPlanner = () => {
     if (!requiredStepsUploaded) return
     // TODO: wire to planner API when available
-    console.log(
-      'Run planner',
-      Object.fromEntries(
-        UPLOAD_STEPS.map((s) => [s.id, stepFiles[s.id]?.name ?? '(yesterday fallback)']),
-      ),
-    )
+    console.log('Run planner', stepFiles)
   }
 
   const handleDownloadYesterday = (stepId: string) => {
@@ -70,9 +59,9 @@ function UploadFile() {
             </p>
           </header>
 
-          <div className="mt-8 gap-3 flex flex-col relative z-10 ">
-      <div className="absolute top-10 left-8 bg-brand-primary z-1 h-[calc(100%-140px)] w-0.5"></div>
-            {UPLOAD_STEPS.map((step, index) => (
+          <div className="relative z-10 mt-8 flex flex-col gap-3">
+            <div className="absolute top-10 left-8 z-1 h-[calc(100%-140px)] w-0.5 bg-brand-primary" />
+            {UPLOAD_STEPS.map((step) => (
               <UploadStep
                 key={step.id}
                 stepNumber={step.stepNumber}
@@ -80,21 +69,18 @@ function UploadFile() {
                 optional={step.optional}
                 outputNote={step.outputNote}
                 footerNote={step.footerNote}
-                file={stepFiles[step.id]}
-                onFileSelect={(file) => handleFileSelect(step.id, file)}
-                disabled={!isStepEnabled(step.stepNumber)}
+                fileSlotIds={getFileSlotIds(step)}
+                files={stepFiles}
+                onFileSelect={handleFileSelect}
+                disabled={!isStepEnabled(step.stepNumber, stepFiles)}
               />
             ))}
           </div>
 
-          <div className="mt-2 flex items-start gap-2 rounded-lg border border-border-default px-4 py-3 text-sm text-brand-danger font-bold">
-            <InfoOutlinedIcon
-              className="shrink-0"
-              sx={{ fontSize: 18 }}
-              aria-hidden
-            />
+          <div className="mt-2 flex items-start gap-2 rounded-lg border border-border-default px-4 py-3 text-sm font-bold text-brand-danger">
+            <InfoOutlinedIcon className="shrink-0" sx={{ fontSize: 18 }} aria-hidden />
             Note:
-            <span className="text-text-primary font-normal">
+            <span className="font-normal text-text-primary">
               Upload files one by one in the above order for accurate scrap mix planning.
             </span>
           </div>
