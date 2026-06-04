@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import UploadRouter from './modules/upload/upload.router';
 import ModelRouter from './modules/model/model.router';
 import { ROUTES} from './constants/route';
+import DownloadRouter from './modules/download/download.router';
 
 const apiRouter = Router();
 
@@ -16,5 +17,6 @@ apiRouter.get(ROUTES.API_HEALTH, (req: Request, res: Response) => {
 
 apiRouter.use(ROUTES.UPLOAD_ROOT, UploadRouter)
 apiRouter.use(ROUTES.MODEL_ROOT, ModelRouter)
+apiRouter.use(ROUTES.DOWNLOAD_ROOT, DownloadRouter)
 
 export default apiRouter;
