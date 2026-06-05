@@ -4,14 +4,18 @@ import { useMemo, useState } from 'react'
 import { UploadSidebar } from '../components/upload/UploadSidebar'
 import { UploadStep } from '../components/upload/UploadStep'
 import {
+    DOWNLOAD_STEPS,
   UPLOAD_STEPS,
   areRequiredFilesUploaded,
   createEmptyStepFiles,
+  createEmptyUploadStatuses,
   getFileSlotIds,
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
 import uploadService from '../service/upload.service'
-import { getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
+import { downloadApiFile, getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
+import modelService from '../service/model.service'
+import downloadService from '../service/download.service'
 
 function formatYesterdayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -23,6 +27,7 @@ function formatYesterdayLabel(date: Date): string {
 
 function UploadFile() {
   const [stepFiles, setStepFiles] = useState(createEmptyStepFiles)
+  const [uploadStatuses, setUploadStatuses] = useState(createEmptyUploadStatuses)
   const [pairedId, setPairedId] = useState<number | null>(null)
 
 
@@ -32,54 +37,99 @@ function UploadFile() {
     return formatYesterdayLabel(yesterday)
   }, [])
 
-  const requiredStepsUploaded = areRequiredFilesUploaded(stepFiles)
+  const requiredStepsUploaded = areRequiredFilesUploaded(uploadStatuses)
+
+  const setSlotUploadStatus = (slotId: string, status: 'idle' | 'uploading' | 'uploaded' | 'error') => {
+    setUploadStatuses((prev) => ({ ...prev, [slotId]: status }))
+  }
 
   const handleFileSelect = async (slotId: string, file: File | null) => {
+    if (!file) {
+      setStepFiles((prev) => ({ ...prev, [slotId]: null }))
+      setSlotUploadStatus(slotId, 'idle')
+      return
+    }
+
     setStepFiles((prev) => ({ ...prev, [slotId]: file }))
+    setSlotUploadStatus(slotId, 'uploading')
+
     const formData = new FormData()
     formData.append('file', file)
     if (pairedId !== null) {
-        formData.append('pairedId', pairedId.toString());
+      formData.append('pairedId', pairedId.toString())
+    }
+
+    try {
+      switch (slotId) {
+        case 'heat-query-all': {
+          const response = await uploadService.uploadHeatQueryAll(formData)
+          const recordId = getUploadRecordId(response?.data)
+          if (recordId != null) setPairedId(recordId)
+          tryDownloadModelOutput(response?.data)
+          break
+        }
+        case 'heat-query-chem': {
+          const response = await uploadService.uploadHeatChem(formData)
+          const recordId = getUploadRecordId(response?.data)
+          if (recordId != null) setPairedId(recordId)
+          tryDownloadModelOutput(response?.data)
+          break
+        }
+        case 'scrap-chem':
+          await uploadService.uploadScrapChem(formData)
+          break
+        case 'heat-query-scheduled-heats':
+          await uploadService.uploadHeatQuerySchedule(formData)
+          break
+        case 'scrap-data-daily-inventory':
+          await uploadService.uploadScrapDataInventory(formData)
+          break
+        case 'met-grade-list':
+          await uploadService.uploadGradeList(formData)
+          break
       }
-    switch (slotId) {
-      case 'heat-query-all': {
-        const response = await uploadService.uploadHeatQueryAll(formData)
-        const recordId = getUploadRecordId(response?.data)
-        if (recordId != null) setPairedId(recordId)
-        tryDownloadModelOutput(response?.data)
-        break
-      }
-      case 'heat-query-chem': {
-        const response = await uploadService.uploadHeatChem(formData)
-        const recordId = getUploadRecordId(response?.data)
-        if (recordId != null) setPairedId(recordId)
-        tryDownloadModelOutput(response?.data)
-        break
-      }
-      case 'scrap-chem':
-        uploadService.uploadScrapChem(formData)
-        break;
-      case 'heat-query-scheduled-heats':
-        uploadService.uploadHeatQuerySchedule(formData)
-        break;
-      case 'scrap-data-daily-inventory':
-        uploadService.uploadScrapDataInventory(formData)
-        break;
-      case 'met-grade-list':
-        uploadService.uploadGradeList(formData)
-        break;
+      setSlotUploadStatus(slotId, 'uploaded')
+    } catch {
+      setSlotUploadStatus(slotId, 'error')
     }
   }
 
-  const handleRunPlanner = () => {
+  const handleRunPlanner = async () => {
     if (!requiredStepsUploaded) return
-    // TODO: wire to planner API when available
-    console.log('Run planner', stepFiles)
+    const response = await modelService.runModel()
+    console.log(response)
   }
 
-  const handleDownloadYesterday = (stepId: string) => {
-    // TODO: wire to download API when available
-    console.log('Download yesterday file', stepId)
+  const handleDownloadYesterday = async (stepId: string) => {
+    try {
+      let response
+      switch (stepId) {
+        case 'heat-query-all':
+          response = await downloadService.downloadHeatQueryAll()
+          break
+        case 'heat-query-chem':
+          response = await downloadService.downloadHeatChem()
+          break
+        case 'scrap-chem':
+          response = await downloadService.downloadScrapChem()
+          break
+        case 'heat-query-scheduled-heats':
+          response = await downloadService.downloadHeatQuerySchedule()
+          break
+        case 'scrap-data-daily-inventory':
+          response = await downloadService.downloadScrapDataInventory()
+          break
+        case 'met-grade-list':
+          response = await downloadService.downloadGradeList()
+          break
+        default:
+          console.error('Invalid step ID', stepId)
+          return
+      }
+      downloadApiFile(response)
+    } catch (error) {
+      console.error('Error downloading yesterday file', error)
+    }
   }
 
   return (
@@ -108,8 +158,9 @@ function UploadFile() {
                 footerNote={step.footerNote}
                 fileSlotIds={getFileSlotIds(step)}
                 files={stepFiles}
+                uploadStatuses={uploadStatuses}
                 onFileSelect={handleFileSelect}
-                disabled={!isStepEnabled(step.stepNumber, stepFiles)}
+                disabled={!isStepEnabled(step.stepNumber, uploadStatuses)}
               />
             ))}
           </div>
@@ -146,6 +197,7 @@ function UploadFile() {
 
         <UploadSidebar
           steps={UPLOAD_STEPS}
+          yesterdaySteps={DOWNLOAD_STEPS}
           yesterdayDateLabel={yesterdayLabel}
           onDownloadYesterday={handleDownloadYesterday}
         />

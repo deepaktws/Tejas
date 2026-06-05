@@ -8,6 +8,9 @@ export const formDataApi = axios.create({
     'Content-Type': 'multipart/form-data',
   },
 });
+export const api = axios.create({
+  baseURL: API_URL + '/api/v1',
+});
 
 formDataApi.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken');
