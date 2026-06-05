@@ -66,7 +66,7 @@ export function UploadSidebar({
               <button
                 type="button"
                 onClick={() => onDownloadYesterday(step.id)}
-                className="flex w-full items-center gap-3 border border-border-default rounded-lg bg-amber-50 px-3 py-2.5 text-left transition-colors hover:bg-amber-100"
+                className="flex w-full items-center gap-3 border border-border-default rounded-lg bg-amber-50 px-3 py-2.5 text-left transition-colors cursor-pointer hover:bg-amber-100"
               >
                 <DescriptionOutlinedIcon
                   className="text-amber-500"
