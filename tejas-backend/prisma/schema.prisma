@@ -25,6 +25,7 @@ model Data {
   id          Int        @id @default(autoincrement())
   filepath    String
   upload_type UploadType
+  session_id  String
   created_at  DateTime   @default(now())
   is_deleted  Boolean    @default(false)
 
