@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { UploadSidebar } from '../components/upload/UploadSidebar'
 import { UploadStep } from '../components/upload/UploadStep'
 import {
+    DOWNLOAD_STEPS,
   UPLOAD_STEPS,
   areRequiredFilesUploaded,
   createEmptyStepFiles,
@@ -12,8 +13,9 @@ import {
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
 import uploadService from '../service/upload.service'
-import { getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
+import { downloadApiFile, getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
 import modelService from '../service/model.service'
+import downloadService from '../service/download.service'
 
 function formatYesterdayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -98,9 +100,36 @@ function UploadFile() {
     console.log(response)
   }
 
-  const handleDownloadYesterday = (stepId: string) => {
-    // TODO: wire to download API when available
-    console.log('Download yesterday file', stepId)
+  const handleDownloadYesterday = async (stepId: string) => {
+    try {
+      let response
+      switch (stepId) {
+        case 'heat-query-all':
+          response = await downloadService.downloadHeatQueryAll()
+          break
+        case 'heat-query-chem':
+          response = await downloadService.downloadHeatChem()
+          break
+        case 'scrap-chem':
+          response = await downloadService.downloadScrapChem()
+          break
+        case 'heat-query-scheduled-heats':
+          response = await downloadService.downloadHeatQuerySchedule()
+          break
+        case 'scrap-data-daily-inventory':
+          response = await downloadService.downloadScrapDataInventory()
+          break
+        case 'met-grade-list':
+          response = await downloadService.downloadGradeList()
+          break
+        default:
+          console.error('Invalid step ID', stepId)
+          return
+      }
+      downloadApiFile(response)
+    } catch (error) {
+      console.error('Error downloading yesterday file', error)
+    }
   }
 
   return (
@@ -168,6 +197,7 @@ function UploadFile() {
 
         <UploadSidebar
           steps={UPLOAD_STEPS}
+          yesterdaySteps={DOWNLOAD_STEPS}
           yesterdayDateLabel={yesterdayLabel}
           onDownloadYesterday={handleDownloadYesterday}
         />

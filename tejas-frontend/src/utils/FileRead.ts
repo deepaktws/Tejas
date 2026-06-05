@@ -12,6 +12,13 @@ export interface HeatUploadResponseData {
   }
 }
 
+/** Shape returned by GET /download/* endpoints */
+export interface ApiFileDownload {
+  filename: string
+  mimeType?: string
+  data?: string
+}
+
 export function saveBlobAsFile(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
@@ -19,6 +26,19 @@ export function saveBlobAsFile(blob: Blob, filename: string): void {
   anchor.download = filename
   anchor.click()
   URL.revokeObjectURL(url)
+}
+
+/** Decode base64 file payload from GET /download/* responses and save locally */
+export function downloadApiFile(file: ApiFileDownload | null | undefined): void {
+  if (!file?.filename || !file.data) return
+
+  const binary = atob(file.data)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  const blob = new Blob([bytes], { type: file.mimeType ?? 'application/octet-stream' })
+  saveBlobAsFile(blob, file.filename)
 }
 
 /** Decode base64 `output_file` from heat-chem / model upload responses and save locally */

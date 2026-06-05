@@ -1,5 +1,10 @@
 export type UploadStatus = 'idle' | 'uploading' | 'uploaded' | 'error'
 
+export type DownloadStepConfig = {
+  id: string
+  title: string
+}
+
 export type UploadStepConfig = {
   id: string
   stepNumber: number
@@ -52,6 +57,33 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
     optional: true,
     footerNote: "If not uploaded, yesterday's file will be used.",
     outputNote: null,
+  },
+]
+
+export const DOWNLOAD_STEPS: DownloadStepConfig[] = [
+  {
+    id: 'heat-query-all',
+    title: 'heat query all file',
+  },
+  {
+    id: 'heat-query-chem',
+    title: 'heat query chem file',
+  },
+  {
+    id: 'scrap-chem',
+    title: 'scrap chem file',
+  },
+  {
+    id: 'heat-query-scheduled-heats',
+    title: 'heat query (scheduled heats) file',
+  },
+  {
+    id: 'scrap-data-daily-inventory',
+    title: 'scrap data daily inventory',
+  },
+  {
+    id: 'met-grade-list',
+    title: 'met grade list',
   },
 ]
 
