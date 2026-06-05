@@ -1,4 +1,25 @@
+import platform
+import sys
+from pathlib import Path
+
 import pandas as pd
+
+
+def get_cbc_solver(module_dir=None, msg=False):
+    """Return a PuLP CBC solver command for the current platform."""
+    from pulp import COIN_CMD, PULP_CBC_CMD
+
+    base_path = Path(sys._MEIPASS) if getattr(sys, "frozen", False) else Path(module_dir or Path(__file__).resolve().parent)
+
+    if platform.system() == "Windows":
+        bundled = base_path / "solver" / "cbc.exe"
+        if bundled.exists():
+            print("🔍 Using bundled CBC solver at:", bundled)
+            return COIN_CMD(path=str(bundled), msg=msg)
+
+    solver = PULP_CBC_CMD(msg=msg)
+    print("🔍 Using PuLP CBC solver at:", solver.path)
+    return solver
 
 def clean_grade_spec_excel(file_path, sheet_name=0):
 

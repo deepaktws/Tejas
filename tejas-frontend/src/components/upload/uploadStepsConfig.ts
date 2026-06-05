@@ -89,6 +89,34 @@ export function areRequiredFilesUploaded(
   return steps.filter((s) => !s.optional).every((step) => isStepComplete(step, files))
 }
 
+export type SlotUploadState = 'idle' | 'uploading' | 'success' | 'error'
+
+export function createEmptyUploadStatus(
+  steps: UploadStepConfig[] = UPLOAD_STEPS,
+): Record<string, SlotUploadState> {
+  return Object.fromEntries(getAllFileSlotIds(steps).map((slotId) => [slotId, 'idle']))
+}
+
+export function isStepEnabledByUpload(
+  stepNumber: number,
+  uploadStatus: Record<string, SlotUploadState>,
+  steps: UploadStepConfig[] = UPLOAD_STEPS,
+): boolean {
+  if (stepNumber === 1) return true
+  const previousStep = steps.find((s) => s.stepNumber === stepNumber - 1)
+  if (!previousStep) return false
+  return getFileSlotIds(previousStep).every((slotId) => uploadStatus[slotId] === 'success')
+}
+
+export function areRequiredSlotsUploaded(
+  uploadStatus: Record<string, SlotUploadState>,
+  steps: UploadStepConfig[] = UPLOAD_STEPS,
+): boolean {
+  return steps
+    .filter((s) => !s.optional)
+    .every((step) => getFileSlotIds(step).every((slotId) => uploadStatus[slotId] === 'success'))
+}
+
 export const YESTERDAY_FILES = UPLOAD_STEPS.map((step) => ({
   id: step.id,
   name: step.title,
