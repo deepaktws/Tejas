@@ -10,6 +10,8 @@ import {
   getFileSlotIds,
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
+import uploadService from '../service/upload.service'
+import { getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
 
 function formatYesterdayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -21,6 +23,8 @@ function formatYesterdayLabel(date: Date): string {
 
 function UploadFile() {
   const [stepFiles, setStepFiles] = useState(createEmptyStepFiles)
+  const [pairedId, setPairedId] = useState<number | null>(null)
+
 
   const yesterdayLabel = useMemo(() => {
     const yesterday = new Date()
@@ -30,8 +34,41 @@ function UploadFile() {
 
   const requiredStepsUploaded = areRequiredFilesUploaded(stepFiles)
 
-  const handleFileSelect = (slotId: string, file: File | null) => {
+  const handleFileSelect = async (slotId: string, file: File | null) => {
     setStepFiles((prev) => ({ ...prev, [slotId]: file }))
+    const formData = new FormData()
+    formData.append('file', file)
+    if (pairedId !== null) {
+        formData.append('pairedId', pairedId.toString());
+      }
+    switch (slotId) {
+      case 'heat-query-all': {
+        const response = await uploadService.uploadHeatQueryAll(formData)
+        const recordId = getUploadRecordId(response?.data)
+        if (recordId != null) setPairedId(recordId)
+        tryDownloadModelOutput(response?.data)
+        break
+      }
+      case 'heat-query-chem': {
+        const response = await uploadService.uploadHeatChem(formData)
+        const recordId = getUploadRecordId(response?.data)
+        if (recordId != null) setPairedId(recordId)
+        tryDownloadModelOutput(response?.data)
+        break
+      }
+      case 'scrap-chem':
+        uploadService.uploadScrapChem(formData)
+        break;
+      case 'heat-query-scheduled-heats':
+        uploadService.uploadHeatQuerySchedule(formData)
+        break;
+      case 'scrap-data-daily-inventory':
+        uploadService.uploadScrapDataInventory(formData)
+        break;
+      case 'met-grade-list':
+        uploadService.uploadGradeList(formData)
+        break;
+    }
   }
 
   const handleRunPlanner = () => {

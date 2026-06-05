@@ -17,10 +17,10 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
     optional: false,
     outputNote: 'Output of Step 1: Scrap chem file',
     footerNote: null,
-    fileSlotIds: ['heat-query', 'heat-query-chem'],
+    fileSlotIds: ['heat-query-all', 'heat-query-chem'],
   },
   {
-    id: 'scrap-chem-file',
+    id: 'scrap-chem',
     stepNumber: 2,
     title: 'scrap chem file',
     optional: false,
@@ -28,7 +28,7 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
     footerNote: null,
   },
   {
-    id: 'heat-query-scheduled-heats-file',
+    id: 'heat-query-scheduled-heats',
     stepNumber: 3,
     title: 'heat query (scheduled heats) file',
     optional: false,
@@ -36,7 +36,7 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
     footerNote: null,
   },
   {
-    id: 'scrap-data-daily-inventory-file',
+    id: 'scrap-data-daily-inventory',
     stepNumber: 4,
     title: 'scrap data daily inventory',
     optional: false,
@@ -44,7 +44,7 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
     footerNote: null,
   },
   {
-    id: 'met-grade-list-file',
+    id: 'met-grade-list',
     stepNumber: 5,
     title: 'met grade list',
     optional: true,
