@@ -23,42 +23,40 @@ export const upload = multer({
 });
 
 export class UploadService {
-  saveHeatQueryAll = async (filepath: string, pairedId?: number) => {
-    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all);
+  saveHeatQueryAll = async (filepath: string, sessionId: string) => {
+    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all, sessionId);
 
-    if (pairedId) {
-      const paired = await uploadRepository.getById(pairedId);
-      if (!paired) throw new Error("Paired file record not found");
-      const modelResult=await sendToModel(record.filepath, paired.filepath);
+    const paired = await uploadRepository.getBySessionId(sessionId, FileType.heat_chem);
+    if (paired) {
+      const modelResult = await sendToModel(record.filepath, paired.filepath);
       return { record, modelResult };
     }
 
     return record;
   };
 
-  saveGradeList = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.grade_list);
+  saveGradeList = async (filepath: string, sessionId: string) => {
+    return await uploadRepository.createUploadRecord(filepath, FileType.grade_list, sessionId);
   };
 
-  saveScrapDataInventory = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_data_inventory);
+  saveScrapDataInventory = async (filepath: string, sessionId: string) => {
+    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_data_inventory, sessionId);
   };
 
-  saveHeatQuerySchedule = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.heat_query_schedule);
+  saveHeatQuerySchedule = async (filepath: string, sessionId: string) => {
+    return await uploadRepository.createUploadRecord(filepath, FileType.heat_query_schedule, sessionId);
   };
 
-  saveScrapChem = async (filepath: string) => {
-    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_chem);
+  saveScrapChem = async (filepath: string, sessionId: string) => {
+    return await uploadRepository.createUploadRecord(filepath, FileType.scrap_chem, sessionId);
   };
 
-  saveHeatChem = async (filepath: string, pairedId?: number) => {
-    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_chem);
+  saveHeatChem = async (filepath: string, sessionId: string) => {
+    const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_chem, sessionId);
 
-    if (pairedId) {
-      const paired = await uploadRepository.getById(pairedId);
-      if (!paired) throw new Error("Paired file record not found");
-      const modelResult=await sendToModel(record.filepath, paired.filepath);
+    const paired = await uploadRepository.getBySessionId(sessionId, FileType.heat_query_all);
+    if (paired) {
+      const modelResult = await sendToModel(paired.filepath, record.filepath);
       return { record, modelResult };
     }
 

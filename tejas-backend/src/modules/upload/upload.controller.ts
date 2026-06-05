@@ -8,8 +8,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const { pairedId } = req.body;
-    const record = await uploadService.saveHeatQueryAll(req.file!.path, pairedId ? Number(pairedId) : undefined);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveHeatQueryAll(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -17,7 +17,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveGradeList(req.file!.path);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveGradeList(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -25,7 +26,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveScrapDataInventory(req.file!.path);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveScrapDataInventory(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -33,7 +35,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveHeatQuerySchedule(req.file!.path);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveHeatQuerySchedule(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -41,7 +44,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const record = await uploadService.saveScrapChem(req.file!.path);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveScrapChem(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 
@@ -49,8 +53,8 @@ export class UploadController {
     req: Request & { file?: Express.Multer.File },
     res: Response
   ) => {
-    const { pairedId } = req.body;
-    const record = await uploadService.saveHeatChem(req.file!.path, pairedId ? Number(pairedId) : undefined);
+    const { sessionId } = req.body;
+    const record = await uploadService.saveHeatChem(req.file!.path, sessionId);
     return res.status(200).json({ message: "File uploaded successfully", data: record });
   };
 }
