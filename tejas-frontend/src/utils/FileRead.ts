@@ -36,7 +36,6 @@ export function getUploadRecordId(
   data: HeatUploadResponseData | undefined
 ): number | undefined {
   if (!data) return undefined
-  if (data.record?.id != null) return data.record.id
   if (data.id != null) return data.id
   return undefined
 }

@@ -7,6 +7,7 @@ import {
   UPLOAD_STEPS,
   areRequiredFilesUploaded,
   createEmptyStepFiles,
+  createEmptyUploadStatuses,
   getFileSlotIds,
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
@@ -23,6 +24,7 @@ function formatYesterdayLabel(date: Date): string {
 
 function UploadFile() {
   const [stepFiles, setStepFiles] = useState(createEmptyStepFiles)
+  const [uploadStatuses, setUploadStatuses] = useState(createEmptyUploadStatuses)
   const [pairedId, setPairedId] = useState<number | null>(null)
 
 
@@ -32,42 +34,60 @@ function UploadFile() {
     return formatYesterdayLabel(yesterday)
   }, [])
 
-  const requiredStepsUploaded = areRequiredFilesUploaded(stepFiles)
+  const requiredStepsUploaded = areRequiredFilesUploaded(uploadStatuses)
+
+  const setSlotUploadStatus = (slotId: string, status: 'idle' | 'uploading' | 'uploaded' | 'error') => {
+    setUploadStatuses((prev) => ({ ...prev, [slotId]: status }))
+  }
 
   const handleFileSelect = async (slotId: string, file: File | null) => {
+    if (!file) {
+      setStepFiles((prev) => ({ ...prev, [slotId]: null }))
+      setSlotUploadStatus(slotId, 'idle')
+      return
+    }
+
     setStepFiles((prev) => ({ ...prev, [slotId]: file }))
+    setSlotUploadStatus(slotId, 'uploading')
+
     const formData = new FormData()
     formData.append('file', file)
     if (pairedId !== null) {
-        formData.append('pairedId', pairedId.toString());
+      formData.append('pairedId', pairedId.toString())
+    }
+
+    try {
+      switch (slotId) {
+        case 'heat-query-all': {
+          const response = await uploadService.uploadHeatQueryAll(formData)
+          const recordId = getUploadRecordId(response?.data)
+          if (recordId != null) setPairedId(recordId)
+          tryDownloadModelOutput(response?.data)
+          break
+        }
+        case 'heat-query-chem': {
+          const response = await uploadService.uploadHeatChem(formData)
+          const recordId = getUploadRecordId(response?.data)
+          if (recordId != null) setPairedId(recordId)
+          tryDownloadModelOutput(response?.data)
+          break
+        }
+        case 'scrap-chem':
+          await uploadService.uploadScrapChem(formData)
+          break
+        case 'heat-query-scheduled-heats':
+          await uploadService.uploadHeatQuerySchedule(formData)
+          break
+        case 'scrap-data-daily-inventory':
+          await uploadService.uploadScrapDataInventory(formData)
+          break
+        case 'met-grade-list':
+          await uploadService.uploadGradeList(formData)
+          break
       }
-    switch (slotId) {
-      case 'heat-query-all': {
-        const response = await uploadService.uploadHeatQueryAll(formData)
-        const recordId = getUploadRecordId(response?.data)
-        if (recordId != null) setPairedId(recordId)
-        tryDownloadModelOutput(response?.data)
-        break
-      }
-      case 'heat-query-chem': {
-        const response = await uploadService.uploadHeatChem(formData)
-        const recordId = getUploadRecordId(response?.data)
-        if (recordId != null) setPairedId(recordId)
-        tryDownloadModelOutput(response?.data)
-        break
-      }
-      case 'scrap-chem':
-        uploadService.uploadScrapChem(formData)
-        break;
-      case 'heat-query-scheduled-heats':
-        uploadService.uploadHeatQuerySchedule(formData)
-        break;
-      case 'scrap-data-daily-inventory':
-        uploadService.uploadScrapDataInventory(formData)
-        break;
-      case 'met-grade-list':
-        uploadService.uploadGradeList(formData)
-        break;
+      setSlotUploadStatus(slotId, 'uploaded')
+    } catch {
+      setSlotUploadStatus(slotId, 'error')
     }
   }
 
@@ -108,8 +128,9 @@ function UploadFile() {
                 footerNote={step.footerNote}
                 fileSlotIds={getFileSlotIds(step)}
                 files={stepFiles}
+                uploadStatuses={uploadStatuses}
                 onFileSelect={handleFileSelect}
-                disabled={!isStepEnabled(step.stepNumber, stepFiles)}
+                disabled={!isStepEnabled(step.stepNumber, uploadStatuses)}
               />
             ))}
           </div>
