@@ -13,6 +13,7 @@ import {
 } from '../components/upload/uploadStepsConfig'
 import uploadService from '../service/upload.service'
 import { getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
+import modelService from '../service/model.service'
 
 function formatYesterdayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -91,10 +92,10 @@ function UploadFile() {
     }
   }
 
-  const handleRunPlanner = () => {
+  const handleRunPlanner = async () => {
     if (!requiredStepsUploaded) return
-    // TODO: wire to planner API when available
-    console.log('Run planner', stepFiles)
+    const response = await modelService.runModel()
+    console.log(response)
   }
 
   const handleDownloadYesterday = (stepId: string) => {

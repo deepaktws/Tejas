@@ -1,4 +1,5 @@
 const API_ENDPOINT = {
+  MODEL_RUN: '/model/run_model',
   HEAT_QUERY_ALL: '/upload/heat-query-all',
   HEAT_CHEM: '/upload/heat-chem',
   GRADE_LIST: '/upload/grade-list',
