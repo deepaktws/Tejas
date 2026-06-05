@@ -4,6 +4,7 @@ import fs from "fs";
 import { FileType } from "../../constants/types";
 import { UploadRepository } from "./upload.repository";
 import { sendToModel } from "../../lib/kalamClient";
+import { cleanupOldFiles } from "../../lib/cleanup";
 
 const uploadRepository = new UploadRepository();
 
@@ -24,6 +25,7 @@ export const upload = multer({
 
 export class UploadService {
   saveHeatQueryAll = async (filepath: string, pairedId?: number) => {
+    cleanupOldFiles().catch(console.error);
     const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_query_all);
 
     if (pairedId) {
@@ -53,6 +55,7 @@ export class UploadService {
   };
 
   saveHeatChem = async (filepath: string, pairedId?: number) => {
+    cleanupOldFiles().catch(console.error);
     const record = await uploadRepository.createUploadRecord(filepath, FileType.heat_chem);
 
     if (pairedId) {
