@@ -509,13 +509,24 @@ class KalmanFilterScrapChemistry:
             runtime_dir = Path(__file__).parent
             bundle_dir = Path(__file__).parent
 
-        vars_file = (
-            runtime_dir / "uploads" / "Scrap_Chem_Input_Variables.xlsx"
-            if (runtime_dir / "uploads" / "Scrap_Chem_Input_Variables.xlsx").exists()
-            else bundle_dir / "uploads" / "Scrap_Chem_Input_Variables.xlsx"
-        )
-        if not vars_file.exists():
-            raise FileNotFoundError(f"Required feature list not found: {vars_file}")
+        cfg_vars = getattr(self.cfg, "feature_variables_path", None)
+        if cfg_vars is not None and Path(cfg_vars).exists():
+            vars_file = Path(cfg_vars)
+        else:
+            vars_file = None
+            for base in (runtime_dir, bundle_dir):
+                for folder in ("Uploads", "uploads"):
+                    candidate = base / folder / "Scrap_Chem_Input_Variables.xlsx"
+                    if candidate.exists():
+                        vars_file = candidate
+                        break
+                if vars_file is not None:
+                    break
+        if vars_file is None or not vars_file.exists():
+            raise FileNotFoundError(
+                f"Required feature list not found. Set cfg.feature_variables_path or place "
+                f"Scrap_Chem_Input_Variables.xlsx under Uploads/"
+            )
         vars_df = pd.read_excel(vars_file)
         if "Feature_Variables" not in vars_df.columns:
             raise ValueError("Scrap_Chem_Input_Variables.xlsx must contain a column named 'Feature_Variables'")
@@ -863,9 +874,58 @@ class KalmanFilterScrapChemistry:
         kf_coef.insert(0, "HeatID", self.kalman_df_bound.get("HeatID", pd.Series(np.nan)))
 
         kf_coef[self.scrap_cols] = kf_coef[self.scrap_cols].round(3) #Added this line to round coefficients for cleaner output
-        self.kf_coef_df = kf_coef.drop_duplicates().reset_index(drop=True)
+        self.kf_coef_df = kf_coef.copy()
 
-        # Per-heat scrap-type coefficient rows (aggregate chem file not saved to disk)
+        # out_coef_path = self.cfg.output_dir / f"KF_Scrap_Type_Predictions_{self.cfg.target_chem}_{date_s}.xlsx"
+        # if out_coef_path.exists():
+        #     old = pd.read_excel(out_coef_path)
+        #     combined = pd.concat([old, kf_coef], ignore_index=True)
+        #     combined = combined.drop_duplicates()
+        #     combined.to_excel(out_coef_path, index=False)
+        # else:
+        #     kf_coef = kf_coef.drop_duplicates()
+        #     kf_coef.to_excel(out_coef_path, index=False)
+
+        # -----------------------------
+        # Save output based on input type
+        # -----------------------------
+        input_ext = getattr(self.cfg, "input_ext", ".xlsx")
+
+        # Decide file path
+        if input_ext == ".csv":
+            out_coef_path = self.cfg.output_dir / f"KF_Scrap_Type_Predictions_{tc}.csv"
+        else:
+            out_coef_path = self.cfg.output_dir / f"KF_Scrap_Type_Predictions_{tc}.xlsx"
+
+        # -----------------------------
+        # Write logic (append + deduplicate)
+        # -----------------------------
+        # if out_coef_path.exists():
+        #
+        #     if input_ext == ".csv":
+        #         enc = getattr(self.cfg, "csv_encoding", None)
+        #         old = read_csv_auto(out_coef_path, preferred_encoding=enc)
+        #     else:
+        #         old = pd.read_excel(out_coef_path)
+        #
+        #     combined = pd.concat([old, kf_coef], ignore_index=True)
+        #     combined = combined.drop_duplicates()
+        #
+        #     if input_ext == ".csv":
+        #         combined.to_csv(out_coef_path, index=False)
+        #     else:
+        #         combined.to_excel(out_coef_path, index=False)
+        #
+        # else:
+        #     kf_coef = kf_coef.drop_duplicates()
+        #
+        #     if input_ext == ".csv":
+        #         kf_coef.to_csv(out_coef_path, index=False)
+        #     else:
+        #         kf_coef.to_excel(out_coef_path, index=False)
+        kf_coef = kf_coef.drop_duplicates().reset_index(drop=True)
+
+        # Per-heat scrap-type coefficient rows
         # for _, crow in kf_coef.iterrows():
         #     hid = _heat_id_for_fname(crow.get("HeatID"))
         #     if input_ext == ".csv":
@@ -875,8 +935,7 @@ class KalmanFilterScrapChemistry:
         #         ph = self.cfg.output_dir / f"KF_Scrap_Type_Predictions_{tc}_Heat_{hid}.xlsx"
         #         crow.to_frame().T.to_excel(ph, index=False)
 
-        # Build/update per-heat output workbook in output_dir from template workbook
-        template_path = BASE_DIR / "Uploads" / "Recom_Scrap_Input_3 1.xlsx"
+        template_path = Path(getattr(self.cfg, "template_path", BASE_DIR / "Uploads" / "Recom_Scrap_Input_3 1.xlsx"))
         if template_path.exists():
             try:
                 row_meta = {"HeatID", "SequenceNum", "GradeID", "GradeName"}
@@ -890,27 +949,40 @@ class KalmanFilterScrapChemistry:
                         t = t[3:].lstrip("- ").lstrip()
                     return t
 
-                for i in range(len(self.kf_coef_df)):
-                    hid = _heat_id_for_fname(self.kf_coef_df.iloc[i].get("HeatID"))
-                    heat_out_path = self.cfg.output_dir / f"KF_Scrap_Type_Predictions_{hid}.xlsx"
-                    pred_row = self.kf_coef_df.iloc[i]
+                #for i in range(len(kf_coef)):
+                # ONLY PROCESS LAST HEAT
+                i = len(kf_coef) - 1
+
+                if i >= 0:
+                    hid = _heat_id_for_fname(kf_coef.iloc[i].get("HeatID"))
+                    heat_out_path = self.cfg.output_dir / f"KF_Scarp_Chemistry_File_{hid}.xlsx"
+                    pred_row = kf_coef.iloc[i]
 
                     source_book_path = heat_out_path if heat_out_path.exists() else template_path
-                    xl = pd.ExcelFile(source_book_path)
-                    book = {sn: pd.read_excel(source_book_path, sheet_name=sn) for sn in xl.sheet_names}
-                    if "Input" not in book:
-                        raise ValueError(f"Workbook has no 'Input' sheet: {source_book_path}")
-
-                    inp = book["Input"].copy()
+                    inp = pd.read_excel(source_book_path, sheet_name="Input").copy()
                     template_inp = pd.read_excel(template_path, sheet_name="Input")
                     allowed_input_cols = set(template_inp.columns.tolist()) | {tc}
+
+                    if "Scrap Type" not in inp.columns and "Scrap_Type" in inp.columns:
+                        inp = inp.rename(columns={"Scrap_Type": "Scrap Type"})
+                    if "Inventory" in inp.columns and "Max Quantity available (NT)" not in inp.columns:
+                        inp = inp.rename(columns={"Inventory": "Max Quantity available (NT)"})
+
                     for c in ("HeatID", "target_chem", "KF_output_date"):
                         if c in inp.columns:
                             inp = inp.drop(columns=[c])
                     inp = inp[[c for c in inp.columns if c in allowed_input_cols]]
 
                     if "Scrap_Type_New" not in inp.columns:
-                        raise ValueError("Input sheet must contain 'Scrap_Type_New'")
+                        scrap_col = "Scrap Type" if "Scrap Type" in inp.columns else None
+                        if scrap_col is None:
+                            raise ValueError("Input sheet must contain 'Scrap_Type_New' or 'Scrap Type'")
+                        key_map = dict(zip(
+                            template_inp["Scrap Type"].astype(str).map(_norm_scrap),
+                            template_inp["Scrap_Type_New"],
+                        ))
+                        inp["Scrap_Type_New"] = inp[scrap_col].astype(str).map(_norm_scrap).map(key_map)
+
                     if tc not in inp.columns:
                         inp[tc] = np.nan
 
@@ -925,9 +997,12 @@ class KalmanFilterScrapChemistry:
                         m = st_suf == key_suf
                         if m.any():
                             return m
-                        if "Scrap Type" in inp.columns:
-                            st = inp["Scrap Type"].astype(str).map(_norm_scrap).map(_strip_chg_prefix)
-                            m = st == key_suf
+                        for scrap_col in ("Scrap Type", "Scrap_Type"):
+                            if scrap_col in inp.columns:
+                                st = inp[scrap_col].astype(str).map(_norm_scrap).map(_strip_chg_prefix)
+                                m = st == key_suf
+                                if m.any():
+                                    return m
                         return m
 
                     for col_name, val in pred_row.items():
@@ -946,17 +1021,20 @@ class KalmanFilterScrapChemistry:
                             inp.loc[mask, col_stripped] = num_f
                         inp.loc[mask, tc] = num_f
 
-                    #Normalize suport elements columns (store as fraction) before saving
-                    # supp_elem = ["Cu", "Cr", "Ni", "Sn", "P"]
-                    # existing_cols = [c for c in supp_elem if c in inp.columns]
-                    # if existing_cols:
-                    #     inp[existing_cols] = (inp[existing_cols].apply(pd.to_numeric, errors="coerce") / 100)
+                    required_cols = [
+                        "Scrap Type", "Scrap_Type_New", "Category", "Maximum_Usage", "Cost", "Yield",
+                        "Yielded_Cost", "Max Quantity available (NT)", "Fe", "C", "Cu", "Ni", "Cr", "Mo",
+                        "Sn", "Si", "Mn", " Power_Cost ()", "Flux+C ()",
+                    ]
+                    inp = inp[[c for c in required_cols if c in inp.columns]]
+                    inp = inp.rename(columns={"Scrap Type": "Scrap_Type", "Max Quantity available (NT)": "Inventory"})
 
-                    book["Input"] = inp
                     with pd.ExcelWriter(heat_out_path, engine="openpyxl") as writer:
-                        for name, df in book.items():
-                            df.to_excel(writer, sheet_name=name, index=False)
+                        inp.to_excel(writer, sheet_name="Input", index=False)
+
                     print(f"Updated per-heat workbook: {heat_out_path}")
+
+                    return heat_out_path
             except Exception as e:
                 print(f"Could not create/update per-heat workbook: {e}")
 
@@ -971,8 +1049,12 @@ class KalmanFilterScrapChemistry:
         self.save_input_heats_passed()
         self.initialize_kalman_state()
         self.run_heatwise()
-        self.save_results()
+        # self.save_results()
+        # print("Done: Kalman filter pipeline complete.")
+        output_file = self.save_results()
         print("Done: Kalman filter pipeline complete.")
+
+        return output_file
 
 
 

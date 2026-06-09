@@ -1,34 +1,36 @@
-def run_optimization_pulp(df_input, target_df, param_df, return_json=False):
+import pandas as pd
+import numpy as np
+# from gurobipy import Model, GRB, quicksum
+import io
+import os
+from pulp import *
+from pathlib import Path
+import sys
+from pulp import COIN_CMD
+import json
+from datetime import datetime
+from io import BytesIO
+import re
+import matplotlib.pyplot as plt
+from helper_functions import *
 
-    print("INSIDE run_optimization_pulp")
+def run_optimization_pulp2(df_input, target_df, plan_weight):
 
-    print("Sum of Purchase cost Before: ", df_input['Purchase Cost'].sum())
+    input_scrap_name = df_input['Scrap_Type']
+    input_scrap_max = df_input['Inventory']
+    # input_scrap_min = df_input['Min Quantity To be Use (NT)']
 
-    # -----------------------------
-    # ADD THIS BLOCK HERE
-    # -----------------------------
-    if target_df is None or target_df.empty:
-        raise ValueError("Target data required for optimization")
+    # input_chem_table = df_input[['C','Si','Mn','Cu','Cr','Ni','Sn','P','S','Mb','Fe']]
+    input_chem_table = df_input[['Fe', 'C', 'Cu', 'Ni', 'Cr', 'Mo', 'Sn', 'Si', 'Mn']] # from scrap availability file
 
-    if param_df is None or param_df.empty:
-        raise ValueError("Parameter data required for optimization")
-
-    input_scrap_name = df_input['Scrap Type']
-    input_scrap_cost = df_input['Purchase Cost']
-    print("Sum of Purchase cost After: ", df_input['Purchase Cost'].sum())
-    input_scrap_max = df_input['Max Quantity available (NT)']
-    input_scrap_min = df_input['Min Quantity To be Use (NT)']
-
-    input_kwh = df_input['KWH']
-    input_yield = df_input['Yield']
-    input_flux_index = df_input['Flux and Carbon Index']
-    input_chem_table = df_input[['C','Si','Mn','Cu','Cr','Ni','Sn','P','S','Mb','Fe']]
-
+    # Input_total_cost   = input_metalic_cost + input_power_cost + input_flux_cost
     Input_total_cost = df_input['Total Yield + Power+ Flux Cost']
 
-    # Fake constraint table for demonstration (replace with actual)
+    # Fake constraint table for demonstration (replace with actual) --> replaced
     target_df.index = target_df['Element']
     target_dict = target_df.to_dict(orient='index')
+    # input_min_constraints = np.zeros(len(input_chem_table.columns))
+    # input_max_constraints = np.ones(len(input_chem_table.columns)) * 1.0
 
     n = len(input_scrap_name)
 
@@ -38,54 +40,61 @@ def run_optimization_pulp(df_input, target_df, param_df, return_json=False):
     x = LpVariable.dicts("x", indices=range(n), lowBound=0, cat="Continuous")
     y = LpVariable.dicts("y", indices=range(n), lowBound=0, cat="Binary")
 
+    scrap_man_bin = LpVariable("bin_manual", lowBound=0, upBound=7, cat="Integer")
+    scrap_rc_no = LpVariable("n_railcar", lowBound=0, upBound=7, cat="Integer")
+
     # Objective function
     m += lpSum(Input_total_cost[i] * x[i] for i in range(n))
 
     # Constraints
     for i in range(n):
-        m += x[i] <= input_scrap_max[i]
-        m += x[i] >= input_scrap_min[i]
+        if input_scrap_max[i] == 0:
+            m += x[i] == 0
+            m += y[i] == 0
+        else:
+            m += x[i] <= input_scrap_max[i] * y[i]
+            # m += x[i] >= input_scrap_min[i] * y[i]
+            # m += x[i] >= 0.01 * y[i]
 
     total_qty = lpSum(x[i] for i in range(n))
-    # m += total_qty >= 100000
-    max_total_qty_per_heat = float(param_df.loc[param_df['Parameter']=='Total capacity per heat','Value'].values[0])
+    # max_total_qty_per_heat = float(param_df.loc[param_df['Parameter']=='Total capacity per heat','Value'].values[0])
+    max_total_qty_per_heat = float(plan_weight)
     m += total_qty >= max_total_qty_per_heat
+
+    # case 1
+    # # if PI or HBI is selected then select 5 scraps else select <=7 scraps
+    # manual_scrap = ['Pig Iron', 'HBI']
+    # scrap_man = input_scrap_name[(input_scrap_name.isin(manual_scrap) == True)]
+    # scrap_rc = input_scrap_name[(input_scrap_name.isin(manual_scrap) == False)]
+    #
+    # # Bin for manual scrap selection
+    # for i in scrap_man.index:
+    #     m += scrap_man_bin >= y[i]
+    # m += scrap_man_bin <= lpSum(y[i] for i in scrap_man.index)
+    #
+    # # scrap no except pig iron and HBI
+    # m += lpSum(y[i] for i in scrap_rc.index) == scrap_rc_no
+    #
+    # m += scrap_rc_no <= 5 + 2*(1-scrap_man_bin)
+    # m += scrap_rc_no >= 5 * scrap_man_bin
+
+    # case 2
+    # m += lpSum(y[i] for i in range(n)) <= 7 # Only if pig iron and/or HBI is used
+    # scrap_wo_pi_or_hbi = input_scrap_name[(input_scrap_name.isin(['Pig Iron','HBI'])==False)]
+    # m += lpSum(y[i] for i in scrap_wo_pi_or_hbi.index) == 5
+
+    # case 3 Maximum number of scraps are 7
+    m += lpSum(y[i] for i in range(n)) <= 7
 
     elements = input_chem_table.columns.tolist()
     for idx, element in enumerate(elements):
         input_chem_table[element] = input_chem_table[element].fillna(0)
         vec = input_chem_table[element].values
-
-        # SKIP CONSTRAINT IF ALL ZERO
-        if vec.sum() == 0:
-            continue
-
         m += (lpSum(x[i] * vec[i] for i in range(n)) >= target_dict[element]['Min'] * total_qty)
         m += (lpSum(x[i] * vec[i] for i in range(n)) <= target_dict[element]['Max'] * total_qty)
 
     # Solve the model
-    # m.solve(PULP_CBC_CMD(msg=False))
-    def get_solver_path():
-        if getattr(sys, 'frozen', False):
-            # 👉 inside EXE (temp folder)
-            base_path = Path(sys._MEIPASS)
-        else:
-            # 👉 normal python
-            base_path = Path(__file__).parent
-
-        solver_path = base_path / "solver" / "cbc.exe"
-
-        print("🔍 Looking for solver at:", solver_path)
-
-        return solver_path
-
-
-    solver_path = get_solver_path()
-
-    if not solver_path.exists():
-        raise ValueError(f"CBC solver not found at {solver_path}")
-
-    m.solve(COIN_CMD(path=str(solver_path), msg=False))
+    m.solve(PULP_CBC_CMD(msg=False))
     # m.solve(GUROBI())
 
     print("Solver Status:", m.status)
@@ -96,48 +105,36 @@ def run_optimization_pulp(df_input, target_df, param_df, return_json=False):
 
     if m.status == 1:
         result_df = pd.DataFrame({
-            "Scrap Type": input_scrap_name,
-            "Quantity Used in Pound": [x[i].value() for i in range(n)],
-            "Cost in Dollar per Pound": Input_total_cost,
-            "Total Cost Contribution in Dollar": [x[i].value() * Input_total_cost[i] for i in range(n)]
+            "Scrap_Type": input_scrap_name,
+            "Quantity Used in Tons": [round(x[i].value(),3) for i in range(n)],
+            "Cost per Ton ($)": Input_total_cost,
+            "Total Cost Contribution ($)": [x[i].value() * Input_total_cost[i] for i in range(n)]
         })
 
         chemistry = {}
         for element in elements:
             vec = input_chem_table[element].values
             avg = sum(x[i].value() * vec[i] for i in range(n)) / sum(x[i].value() for i in range(n))
-            chemistry[element] = avg * 100
+            chemistry[element] = round(avg,3)
 
         chemistry_df = pd.DataFrame(chemistry, index=["Achieved Chemistry"])
 
-        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-            result_df.to_excel(writer, index=False, sheet_name="Scrap Mix")
-            chemistry_df.to_excel(writer, sheet_name="Chemistry")
+       # with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        #    result_df.to_excel(writer, index=False, sheet_name="Scrap Mix")
+         #   chemistry_df.to_excel(writer, sheet_name="Chemistry")
 
-        output.seek(0)
-
-        if return_json:
-            output_json = {
-                "scrap_mix": result_df.to_dict(orient="records"),
-                "chemistry": chemistry_df.reset_index().to_dict(orient="records")
-            }
     else:
-        result_df = pd.DataFrame(['No Solution Found'], columns=['Result'])
+        result_df = pd.DataFrame({
+            "Scrap_Type": ['No Solution Found'],
+            "Quantity Used in Tons": [0],
+            "Cost per Ton ($)": [0],
+            "Total Cost Contribution ($)": [0]
+        })
+        
+        chemistry_df = pd.DataFrame()
 
-        # ✅ ALWAYS CREATE CHEMISTRY SHEET
-        chemistry_df = pd.DataFrame({'Message': ['No Chemistry Data']})
+       # with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        #    result_df.to_excel(writer, index=False, sheet_name="Scrap Mix")
+            # chemistry_df.to_excel(writer, sheet_name="Chemistry")
 
-        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-            result_df.to_excel(writer, index=False, sheet_name="Scrap Mix")
-            chemistry_df.to_excel(writer, sheet_name="Chemistry")
-
-        output.seek(0)
-
-        output_json = {
-            "scrap_mix": result_df.to_dict(orient="records")
-        }
-
-    # m.dispose()
-    if return_json:
-        return output, output_json
-    return output
+    return result_df, chemistry_df

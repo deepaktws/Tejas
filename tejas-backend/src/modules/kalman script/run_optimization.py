@@ -382,7 +382,6 @@ def run_heatwise_optimization(
 
     # ✅ ADD HERE (inside function, top)
     first_actual_qty_df = None
-    last_success_output_path = None
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -967,7 +966,6 @@ def run_heatwise_optimization(
                     last_success_excel = BytesIO(output_excel.read())
                     last_success_heat = heat_id
                     last_success_heat_row = heat_row.copy()
-                    last_success_output_path = output_path
 
             except:
                 pass
@@ -977,7 +975,7 @@ def run_heatwise_optimization(
     if 'last_success_excel' in locals():
         last_output_excel = last_success_excel
     else:
-        return [], [], None, None, None
+        return [], [], None, None
     # Try reading as Excel first
     last_output_excel.seek(0)
 
@@ -985,7 +983,7 @@ def run_heatwise_optimization(
 
     # ✅ HANDLE NO SOLUTION CASE
     if "Scrap Type" not in df_scrap.columns:
-        return [], [], None, None, None
+        return [], [], None, None
 
     print([repr(col) for col in df_scrap.columns])
 
@@ -1118,5 +1116,6 @@ def run_heatwise_optimization(
     # chem_json = df_chem.to_dict(orient="records")
     chem_json = json.loads(df_chem.to_json(orient="records"))
 
-    return scrap_json, chem_json, actual_cost, suggested_cost, last_success_output_path
+    # return True
+    return scrap_json, chem_json, actual_cost, suggested_cost
 
