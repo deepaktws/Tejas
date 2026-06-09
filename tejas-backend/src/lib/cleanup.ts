@@ -1,5 +1,6 @@
 import fs from "fs";
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 
 const isFirstUploadToday = async (): Promise<boolean> => {
   const today = new Date();
@@ -7,7 +8,7 @@ const isFirstUploadToday = async (): Promise<boolean> => {
   const count = await prisma.data.count({
     where: { created_at: { gte: today } },
   });
-  console.log("isFirstUploadToday count:", count);
+  logger.info({ count }, "isFirstUploadToday count");
   return count === 0;
 };
 
@@ -19,7 +20,7 @@ const getPreviousWorkingDayStart = async (): Promise<Date | null> => {
     orderBy: { created_at: "desc" },
     select: { created_at: true },
   });
-  console.log("prevWorkingDayStart lastRecord:", lastRecord);
+  logger.info({ lastRecord }, "prevWorkingDayStart lastRecord");
   if (!lastRecord) return null;
   const prevDay = new Date(lastRecord.created_at);
   prevDay.setHours(0, 0, 0, 0);
@@ -31,7 +32,7 @@ const getOldRecords = async (before: Date) => {
     where: { created_at: { lt: before }, is_deleted: false },
     select: { id: true, filepath: true },
   });
-  console.log("oldRecords count:", records.length);
+  logger.info({ count: records.length }, "oldRecords count");
   return records;
 };
 
@@ -42,7 +43,7 @@ const deleteFilesFromDisk = (filepaths: string[]): void => {
         fs.unlinkSync(filepath);
       }
     } catch (err) {
-      console.error(`Failed to delete file ${filepath}:`, err);
+      logger.error({ err, filepath }, "Failed to delete file");
     }
   }
 };
@@ -60,7 +61,7 @@ export const cleanupOldFiles = async (): Promise<void> => {
     if (!firstUpload) return;
 
     const prevWorkingDayStart = await getPreviousWorkingDayStart();
-    console.log("prevWorkingDayStart:", prevWorkingDayStart);
+    logger.info({ prevWorkingDayStart }, "prevWorkingDayStart");
     if (!prevWorkingDayStart) return;
 
     const oldRecords = await getOldRecords(prevWorkingDayStart);
@@ -68,8 +69,8 @@ export const cleanupOldFiles = async (): Promise<void> => {
 
     deleteFilesFromDisk(oldRecords.map((r) => r.filepath));
     await softDeleteRecordsInDb(oldRecords.map((r) => r.id));
-    console.log(`Cleanup: soft deleted ${oldRecords.length} old records`);
+    logger.info({ deletedCount: oldRecords.length }, "Cleanup completed");
   } catch (err) {
-    console.error("Cleanup failed:", err);
+    logger.error({err}, "Cleanup failed");
   }
 };
