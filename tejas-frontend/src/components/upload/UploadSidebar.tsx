@@ -1,16 +1,18 @@
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import type { UploadStepConfig } from './uploadStepsConfig'
+import type { DownloadStepConfig, UploadStepConfig } from './uploadStepsConfig'
 
 type UploadSidebarProps = {
   steps: UploadStepConfig[]
+  yesterdaySteps: DownloadStepConfig[]
   yesterdayDateLabel: string
   onDownloadYesterday: (stepId: string) => void
 }
 
 export function UploadSidebar({
   steps,
+  yesterdaySteps,
   yesterdayDateLabel,
   onDownloadYesterday,
 }: UploadSidebarProps) {
@@ -59,12 +61,12 @@ export function UploadSidebar({
           Download the files uploaded yesterday ({yesterdayDateLabel}).
         </p>
         <ul className="mt-4 space-y-2">
-          {steps.map((step) => (
+          {yesterdaySteps.map((step) => (
             <li key={step.id}>
               <button
                 type="button"
                 onClick={() => onDownloadYesterday(step.id)}
-                className="flex w-full items-center gap-3 border border-border-default rounded-lg bg-amber-50 px-3 py-2.5 text-left transition-colors hover:bg-amber-100"
+                className="flex w-full items-center gap-3 border border-border-default rounded-lg bg-amber-50 px-3 py-2.5 text-left transition-colors cursor-pointer hover:bg-amber-100"
               >
                 <DescriptionOutlinedIcon
                   className="text-amber-500"

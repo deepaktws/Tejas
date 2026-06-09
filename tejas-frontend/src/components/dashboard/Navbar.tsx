@@ -12,7 +12,7 @@ export function Navbar() {
   return (
     <header className="flex h-14 items-center justify-between bg-brand-primary px-4 py-4">
       <img src={images.jswSteelWhiteLogo} alt="JSW Steel Logo" className="w-30 h-10 object-contain rounded-lg" />
-      <div className="flex items-center mr-20">
+      <div className="flex items-center mr-30">
         <img src={images.tejasLogo} alt="Tejas Logo" className="w-15 h-10 object-contain" />
         <img src={images.tejasNameLogo} alt="Tejas Name Logo" className="w-30 h-10 object-contain" />
       </div>
@@ -70,12 +70,12 @@ export function Navbar() {
           )}
         </button> */}
 
-        <div
+        {/* <div
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-text-inverse text-sm font-semibold text-brand-primary"
           aria-label="User profile"
         >
             {username.split(' ').map((name) => name.charAt(0).toUpperCase()).join('').slice(0, 2)}
-        </div>
+        </div> */}
       </div>
     </header>
   )

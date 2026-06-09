@@ -1,3 +1,10 @@
+export type UploadStatus = 'idle' | 'uploading' | 'uploaded' | 'error'
+
+export type DownloadStepConfig = {
+  id: string
+  title: string
+}
+
 export type UploadStepConfig = {
   id: string
   stepNumber: number
@@ -53,6 +60,33 @@ export const UPLOAD_STEPS: UploadStepConfig[] = [
   },
 ]
 
+export const DOWNLOAD_STEPS: DownloadStepConfig[] = [
+  {
+    id: 'heat-query-all',
+    title: 'heat query all file',
+  },
+  {
+    id: 'heat-query-chem',
+    title: 'heat query chem file',
+  },
+  {
+    id: 'scrap-chem',
+    title: 'scrap chem file',
+  },
+  {
+    id: 'heat-query-scheduled-heats',
+    title: 'heat query (scheduled heats) file',
+  },
+  {
+    id: 'scrap-data-daily-inventory',
+    title: 'scrap data daily inventory',
+  },
+  {
+    id: 'met-grade-list',
+    title: 'met grade list',
+  },
+]
+
 export function getFileSlotIds(step: UploadStepConfig): string[] {
   return step.fileSlotIds ?? [step.id]
 }
@@ -65,28 +99,34 @@ export function createEmptyStepFiles(steps: UploadStepConfig[] = UPLOAD_STEPS): 
   return Object.fromEntries(getAllFileSlotIds(steps).map((slotId) => [slotId, null]))
 }
 
+export function createEmptyUploadStatuses(
+  steps: UploadStepConfig[] = UPLOAD_STEPS,
+): Record<string, UploadStatus> {
+  return Object.fromEntries(getAllFileSlotIds(steps).map((slotId) => [slotId, 'idle']))
+}
+
 export function isStepComplete(
   step: UploadStepConfig,
-  files: Record<string, File | null>,
+  uploadStatuses: Record<string, UploadStatus>,
 ): boolean {
-  return getFileSlotIds(step).every((slotId) => files[slotId] !== null)
+  return getFileSlotIds(step).every((slotId) => uploadStatuses[slotId] === 'uploaded')
 }
 
 export function isStepEnabled(
   stepNumber: number,
-  files: Record<string, File | null>,
+  uploadStatuses: Record<string, UploadStatus>,
   steps: UploadStepConfig[] = UPLOAD_STEPS,
 ): boolean {
   if (stepNumber === 1) return true
   const previousStep = steps.find((s) => s.stepNumber === stepNumber - 1)
-  return previousStep ? isStepComplete(previousStep, files) : false
+  return previousStep ? isStepComplete(previousStep, uploadStatuses) : false
 }
 
 export function areRequiredFilesUploaded(
-  files: Record<string, File | null>,
+  uploadStatuses: Record<string, UploadStatus>,
   steps: UploadStepConfig[] = UPLOAD_STEPS,
 ): boolean {
-  return steps.filter((s) => !s.optional).every((step) => isStepComplete(step, files))
+  return steps.filter((s) => !s.optional).every((step) => isStepComplete(step, uploadStatuses))
 }
 
 export const YESTERDAY_FILES = UPLOAD_STEPS.map((step) => ({

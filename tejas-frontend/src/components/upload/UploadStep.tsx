@@ -1,16 +1,57 @@
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined'
 import { type ChangeEvent, useId, useRef } from 'react'
+import type { UploadStatus } from './uploadStepsConfig'
 
 type UploadFileInputProps = {
   disabled?: boolean
   file: File | null
+  uploadStatus: UploadStatus
   onFileChange: (file: File | null) => void
 }
 
-function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInputProps) {
+function getStatusDisplay(uploadStatus: UploadStatus): {
+  label: string
+  dotClass: string
+  textClass: string
+} {
+  switch (uploadStatus) {
+    case 'uploading':
+      return {
+        label: 'Uploading...',
+        dotClass: 'bg-amber-500 animate-pulse',
+        textClass: 'font-medium text-amber-600',
+      }
+    case 'uploaded':
+      return {
+        label: 'Uploaded',
+        dotClass: 'bg-border-selected',
+        textClass: 'font-medium text-border-selected',
+      }
+    case 'error':
+      return {
+        label: 'Upload failed',
+        dotClass: 'bg-brand-danger',
+        textClass: 'font-medium text-brand-danger',
+      }
+    default:
+      return {
+        label: 'Not uploaded',
+        dotClass: 'bg-text-muted',
+        textClass: 'text-text-secondary',
+      }
+  }
+}
+
+function UploadFileInput({
+  disabled = false,
+  file,
+  uploadStatus,
+  onFileChange,
+}: UploadFileInputProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
-  const isUploaded = file !== null
+  const isUploading = uploadStatus === 'uploading'
+  const statusDisplay = getStatusDisplay(uploadStatus)
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.files?.[0] ?? null
@@ -20,10 +61,10 @@ function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInp
   return (
     <div className="flex flex-wrap items-center gap-4">
       <label
-        htmlFor={disabled ? undefined : inputId}
+        htmlFor={disabled || isUploading ? undefined : inputId}
         className={[
           'flex w-[200px] flex-row items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-2',
-          disabled
+          disabled || isUploading
             ? 'cursor-not-allowed border-border-default opacity-60'
             : 'cursor-pointer border-border-default bg-surface-card hover:border-brand-accent',
         ].join(' ')}
@@ -37,7 +78,7 @@ function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInp
             type="file"
             accept=".xlsx,.xls,.csv"
             className="sr-only"
-            disabled={disabled}
+            disabled={disabled || isUploading}
             onChange={handleInputChange}
           />
           <p className="mt-2 max-w-[120px] truncate text-xs text-text-primary">
@@ -48,19 +89,10 @@ function UploadFileInput({ disabled = false, file, onFileChange }: UploadFileInp
 
       <div className="flex items-center gap-2 text-sm">
         <span
-          className={[
-            'size-2 rounded-full',
-            isUploaded ? 'bg-border-selected' : 'bg-text-muted',
-          ].join(' ')}
+          className={['size-2 rounded-full', statusDisplay.dotClass].join(' ')}
           aria-hidden
         />
-        <span
-          className={
-            isUploaded ? 'font-medium text-border-selected' : 'text-text-secondary'
-          }
-        >
-          {isUploaded ? 'Uploaded' : 'Not uploaded'}
-        </span>
+        <span className={statusDisplay.textClass}>{statusDisplay.label}</span>
       </div>
     </div>
   )
@@ -74,6 +106,7 @@ export type UploadStepProps = {
   footerNote?: string | null
   fileSlotIds: string[]
   files: Record<string, File | null>
+  uploadStatuses: Record<string, UploadStatus>
   onFileSelect: (slotId: string, file: File | null) => void
   disabled?: boolean
 }
@@ -86,6 +119,7 @@ export function UploadStep({
   footerNote,
   fileSlotIds,
   files,
+  uploadStatuses,
   onFileSelect,
   disabled = false,
 }: UploadStepProps) {
@@ -123,6 +157,7 @@ export function UploadStep({
               key={slotId}
               disabled={disabled}
               file={files[slotId] ?? null}
+              uploadStatus={uploadStatuses[slotId] ?? 'idle'}
               onFileChange={(selected) => onFileSelect(slotId, selected)}
             />
           ))}
