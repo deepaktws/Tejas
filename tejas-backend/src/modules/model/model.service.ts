@@ -1,5 +1,6 @@
 import { ModelRepository } from "./model.repository";
 import { sendToPlanner } from "../../lib/kalamClient";
+import { AppError } from "../../errors/AppError";
 
 const modelRepository = new ModelRepository();
 
@@ -18,9 +19,9 @@ export class ModelService {
     const scrapInventory = files.find(f => f.id === scrapInventoryId);
     const gradeFile = gradeFileId ? files.find(f => f.id === gradeFileId) : undefined;
 
-    if (!kfFile) throw new Error(`KF file record not found: ${scrapChemId}`);
-    if (!heatQuerySchedule) throw new Error(`HeatQuerySchedule record not found: ${heatQueryScheduleId}`);
-    if (!scrapInventory) throw new Error(`ScrapInventory record not found: ${scrapInventoryId}`);
+    if (!kfFile) throw new AppError(`KF file record not found: ${scrapChemId}`, 404);
+    if (!heatQuerySchedule) throw new AppError(`HeatQuerySchedule record not found: ${heatQueryScheduleId}`, 404);
+    if (!scrapInventory) throw new AppError(`ScrapInventory record not found: ${scrapInventoryId}`, 404);
 
     return await sendToPlanner(
       kfFile.filepath,

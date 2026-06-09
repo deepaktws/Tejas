@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { FileType } from "../../constants/types";
 import { DownloadRepository } from "./download.repository";
+import { AppError } from "../../errors/AppError";
 
 const downloadRepository = new DownloadRepository();
 
@@ -19,7 +20,7 @@ const getMimeType = (filepath: string) => {
 
 const readAsBase64 = (filepath: string) => {
   const absPath = path.resolve(filepath);
-  if (!fs.existsSync(absPath)) throw new Error("File not found on disk");
+  if (!fs.existsSync(absPath)) throw new AppError("File not found on disk", 404);
   const buffer = fs.readFileSync(absPath);
   return {
     filename: path.basename(absPath),

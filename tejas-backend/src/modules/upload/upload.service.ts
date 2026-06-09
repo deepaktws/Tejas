@@ -5,6 +5,7 @@ import { FileType } from "../../constants/types";
 import { UploadRepository } from "./upload.repository";
 import { sendToModel } from "../../lib/kalamClient";
 import { cleanupOldFiles } from "../../lib/cleanup";
+import { AppError } from "../../errors/AppError";
 
 const uploadRepository = new UploadRepository();
 
@@ -30,7 +31,7 @@ export class UploadService {
 
     if (pairedId) {
       const paired = await uploadRepository.getById(pairedId);
-      if (!paired) throw new Error("Paired file record not found");
+      if (!paired) throw new AppError("Paired file record not found", 404);
       const modelResult=await sendToModel(record.filepath, paired.filepath);
       return { record, modelResult };
     }
@@ -60,7 +61,7 @@ export class UploadService {
 
     if (pairedId) {
       const paired = await uploadRepository.getById(pairedId);
-      if (!paired) throw new Error("Paired file record not found");
+      if (!paired) throw new AppError("Paired file record not found", 404);
       const modelResult=await sendToModel(record.filepath, paired.filepath);
       return { record, modelResult };
     }
