@@ -41,3 +41,38 @@ export const sendToModel = async (
 
   return runRes.data;
 };
+
+
+export const sendToPlanner = async (
+  kfFilePath: string,  
+  heatQuerySchedulePath: string,
+  scrapInventoryPath: string,
+  gradeFilePath?: string,
+  returnFormat: string = "both"
+) => {
+  const formData = new FormData();
+
+  formData.append("kf_file", fs.createReadStream(kfFilePath), path.basename(kfFilePath).replace(/^\d+-/, ""));
+  formData.append("heat_query", fs.createReadStream(heatQuerySchedulePath), path.basename(heatQuerySchedulePath).replace(/^\d+-/, ""));
+  formData.append("scrap_inventory", fs.createReadStream(scrapInventoryPath), path.basename(scrapInventoryPath).replace(/^\d+-/, ""));
+
+  if (gradeFilePath) {
+    formData.append("grade_spec", fs.createReadStream(gradeFilePath), path.basename(gradeFilePath).replace(/^\d+-/, ""));
+  }
+
+  formData.append("return_format", returnFormat);
+
+  const plannerRes = await axios.post(`${config.FLASK_BASE_URL}/planner`, formData, {
+    headers: formData.getHeaders(),
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    timeout: 120000,
+    validateStatus: () => true,
+  });
+
+  if (plannerRes.status !== 200) {
+    throw new Error(`Flask /planner failed: ${JSON.stringify(plannerRes.data)}`);
+  }
+
+  return plannerRes.data;
+};
