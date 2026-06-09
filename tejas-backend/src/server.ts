@@ -1,20 +1,20 @@
 // src/server.ts
-import express from 'express';
-import cors from 'cors';
-import { config } from './config';
-import apiRouter from './router'; // Import your endpoints
+import express from "express";
+import cors from "cors";
+import pinoHttp from "pino-http";
+import { config } from "./config";
+import apiRouter from "./router";
+import { logger } from "./lib/logger";
 
 const app = express();
 const PORT = config.PORT;
 
-// 1. Middleware
+app.use(pinoHttp({ logger }));
 app.use(cors());
 app.use(express.json());
 
-// 2. Attach Endpoints (We prefix them with /api)
-app.use('/api/v1', apiRouter); 
+app.use("/api/v1", apiRouter);
 
-// 3. Start the Server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${config.PORT}`);
+  logger.info({ port: PORT }, "Server started");
 });
