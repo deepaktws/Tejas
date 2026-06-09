@@ -23,7 +23,7 @@ const readAsBase64 = (filepath: string) => {
   if (!fs.existsSync(absPath)) throw new AppError("File not found on disk", 404);
   const buffer = fs.readFileSync(absPath);
   return {
-    filename: path.basename(absPath),
+    filename: path.basename(absPath).replace(/^\d+-/, ""),
     mimeType: getMimeType(absPath),
     size: buffer.length,
     data: buffer.toString("base64"),

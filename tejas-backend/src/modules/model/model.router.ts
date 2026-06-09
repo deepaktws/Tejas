@@ -6,6 +6,6 @@ import { asyncHandler } from "../../middleware/asyncHandler";
 const ModelRouter = Router();
 const controller = new ModelController();
 
-ModelRouter.get(ROUTES.MODEL_RUN, asyncHandler(controller.modelRun));
+ModelRouter.post(ROUTES.MODEL_RUN, asyncHandler(controller.modelRun));
 
 export default ModelRouter;
