@@ -961,12 +961,27 @@ class KalmanFilterScrapChemistry:
                     source_book_path = heat_out_path if heat_out_path.exists() else template_path
                     inp = pd.read_excel(source_book_path, sheet_name="Input").copy()
                     template_inp = pd.read_excel(template_path, sheet_name="Input")
-                    allowed_input_cols = set(template_inp.columns.tolist()) | {tc}
+
+                    output_cols = [
+                        "Scrap Type", "Category", "Maximum_Usage", "Cost", "Yield",
+                        "Yielded_Cost", "Max Quantity available (NT)", "Fe", "C", "Cu", "Ni", "Cr", "Mo",
+                        "Sn", "Si", "Mn", " Power_Cost ()", "Flux+C ()",
+                    ]
+                    template_to_output = {
+                        "Scrap Category": "Category",
+                        "Purchase Cost": "Cost",
+                        "Metallic Yield Cost": "Yielded_Cost",
+                        "Power Cost @ 0.0504$ / KWH": " Power_Cost ()",
+                        "Flux and Carbon Cost (31 +/- 6 $)": "Flux+C ()",
+                        "Mb": "Mo",
+                    }
 
                     if "Scrap Type" not in inp.columns and "Scrap_Type" in inp.columns:
                         inp = inp.rename(columns={"Scrap_Type": "Scrap Type"})
                     if "Inventory" in inp.columns and "Max Quantity available (NT)" not in inp.columns:
                         inp = inp.rename(columns={"Inventory": "Max Quantity available (NT)"})
+
+                    allowed_input_cols = set(template_inp.columns.tolist()) | set(output_cols) | {tc}
 
                     for c in ("HeatID", "target_chem", "KF_output_date"):
                         if c in inp.columns:
@@ -1021,13 +1036,16 @@ class KalmanFilterScrapChemistry:
                             inp.loc[mask, col_stripped] = num_f
                         inp.loc[mask, tc] = num_f
 
-                    required_cols = [
-                        "Scrap Type", "Scrap_Type_New", "Category", "Maximum_Usage", "Cost", "Yield",
-                        "Yielded_Cost", "Max Quantity available (NT)", "Fe", "C", "Cu", "Ni", "Cr", "Mo",
-                        "Sn", "Si", "Mn", " Power_Cost ()", "Flux+C ()",
-                    ]
-                    inp = inp[[c for c in required_cols if c in inp.columns]]
-                    inp = inp.rename(columns={"Scrap Type": "Scrap_Type", "Max Quantity available (NT)": "Inventory"})
+                    if "Scrap_Type_New" in inp.columns:
+                        inp = inp.drop(columns=["Scrap_Type_New"])
+
+                    # Prefer output column names; drop template aliases only in memory before writing.
+                    for template_name, output_name in template_to_output.items():
+                        if template_name in inp.columns and output_name in inp.columns:
+                            inp = inp.drop(columns=[template_name])
+
+                    inp = inp.rename(columns={k: v for k, v in template_to_output.items() if k in inp.columns})
+                    inp = inp.reindex(columns=output_cols)
 
                     with pd.ExcelWriter(heat_out_path, engine="openpyxl") as writer:
                         inp.to_excel(writer, sheet_name="Input", index=False)

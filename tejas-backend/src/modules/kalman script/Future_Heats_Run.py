@@ -11,6 +11,13 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 PLANNER_OUTPUT_FILENAME = "Scarp_Mix_Recommendation_File.xlsx"
 
 
+def _scrap_type_col(df, label="dataframe"):
+    for col in ("Scrap_Type", "Scrap Type"):
+        if col in df.columns:
+            return col
+    raise KeyError(f"{label} must contain 'Scrap_Type' or 'Scrap Type'")
+
+
 def load_kf_input_dataframe(kf_source):
     """Load KF Input sheet from path or use a pre-built DataFrame."""
     if isinstance(kf_source, pd.DataFrame):
@@ -121,7 +128,11 @@ def future_heats(heat_query: pd.DataFrame,
     # Copy chemistry columns from KF input to scrap availability
     # -------------------------------------------------------------------------
     # Find scrap types not matching
-    missing_scraps = (set(df1_input["Scrap_Type"].dropna().astype(str).str.strip()) - set(kf_input_df["Scrap_Type"].dropna().astype(str).str.strip()))
+    kf_scrap_col = _scrap_type_col(kf_input_df, "KF input")
+    missing_scraps = (
+        set(df1_input["Scrap_Type"].dropna().astype(str).str.strip())
+        - set(kf_input_df[kf_scrap_col].dropna().astype(str).str.strip())
+    )
 
     # Print unmatched scrap types
     if missing_scraps:
@@ -142,7 +153,7 @@ def future_heats(heat_query: pd.DataFrame,
 
         temp_map = dict(
             zip(
-                kf_input_df["Scrap_Type"].astype(str).str.strip(),
+                kf_input_df[kf_scrap_col].astype(str).str.strip(),
                 kf_input_df[col]
             )
         )
