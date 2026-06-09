@@ -38,6 +38,7 @@ export enum StatusCodes {
 export const StatusMessages = {
     SUCCESS: "Success",
     CREATED: "Created",
+    CONTACT_ADMINISTRATOR_SUCCESSFUL: "Your request has been sent",
 
     INVALID_CREDENTIALS: "Invalid credentials",
     INVALID_REFRESH_TOKEN: "Invalid refresh token",
@@ -51,5 +52,12 @@ export const StatusMessages = {
     USER_CREATED: "User created successfully",
     USER_UPDATED: "User updated successfully",
     USER_DELETED: "User deleted successfully",
+
     FORBIDDEN: "Forbidden",
+
+    ROLE_ALREADY_EXISTS: "Role already exists",
+    ROLE_CREATED: "Role created successfully",
+    ROLE_NOT_FOUND: "Role not found",
+    ROLE_UPDATED: "Role updated successfully",
+    ROLE_DELETED: "Role deleted successfully",
 } 

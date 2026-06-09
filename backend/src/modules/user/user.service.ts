@@ -23,7 +23,7 @@ export class UserService {
         }
 
         const passwordHash = await hashPassword(dto.password);
-        const user = await this.userRepository.create({ ...dto, passwordHash, createdBy: requesterId ?? null });
+        const user = await this.userRepository.create({ ...dto, passwordHash, createdBy: requesterId ?? null, userRoles: dto.userRoles });
 
         return successResponse(StatusMessages.USER_CREATED, user as UserItem);
     }
@@ -34,10 +34,6 @@ export class UserService {
     }
 
     async updateUser(id: string, requesterId: string, data: UpdateUserDto): Promise<SuccessResponseType<UserItem> | ErrorResponseType> {
-        if (id !== requesterId) {
-            return errorResponse(StatusMessages.FORBIDDEN, StatusCodes.FORBIDDEN);
-        }
-
         const user = await this.userRepository.findById(id);
         if (!user) {
             return errorResponse(StatusMessages.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
@@ -52,9 +48,6 @@ export class UserService {
     }
 
     async deleteUser(id: string, requesterId: string): Promise<SuccessResponseType | ErrorResponseType> {
-        if (id !== requesterId) {
-            return errorResponse(StatusMessages.FORBIDDEN, StatusCodes.FORBIDDEN);
-        }
 
         const user = await this.userRepository.findById(id);
         if (!user) {

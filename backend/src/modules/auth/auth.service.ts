@@ -100,4 +100,9 @@ export class AuthService {
 
         return successResponse(StatusMessages.TOKENS_REFRESHED_SUCCESSFULLY, { accessToken: newAccessToken, refreshToken: newRefreshToken });
     }
+
+    // 4. contact administrator method
+    contactAdministrator(): SuccessResponseType {
+        return successResponse(StatusMessages.CONTACT_ADMINISTRATOR_SUCCESSFUL, null, StatusCodes.SUCCESS);  // TODO: Implement the logic to contact the administrator
+    }
 }

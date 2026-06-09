@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,119 +7,113 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  userName     String   @unique @map("user_name")
+  id           String     @id @default(uuid())
+  userName     String     @unique @map("user_name")
   name         String?
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  createdBy    String?  @map("created_by")
-  updatedAt    DateTime? @updatedAt @map("updated_at")
-  updatedBy    String?  @map("updated_by")
-  deletedAt    DateTime? @map("deleted_at")
-  deletedBy    String?  @map("deleted_by")
-
+  passwordHash String     @map("password_hash")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  createdBy    String?    @map("created_by")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  updatedBy    String?    @map("updated_by")
+  deletedAt    DateTime?  @map("deleted_at")
+  deletedBy    String?    @map("deleted_by")
+  contact      String?
+  designation  String?
   userRoles    UserRole[]
 
   @@map("users")
 }
 
 model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  createdBy   String?  @map("created_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  updatedBy   String?  @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedBy   String?  @map("deleted_by")
-
-  userRoles       UserRole[]
+  id              String           @id @default(uuid())
+  name            String           @unique
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  createdBy       String?          @map("created_by")
+  updatedAt       DateTime?        @updatedAt @map("updated_at")
+  updatedBy       String?          @map("updated_by")
+  deletedAt       DateTime?        @map("deleted_at")
+  deletedBy       String?          @map("deleted_by")
   rolePermissions RolePermission[]
+  userRoles       UserRole[]
 
   @@map("roles")
 }
 
 model UserRole {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  roleId    String   @map("role_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  createdBy String?  @map("created_by")
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  roleId    String    @map("role_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy String?   @map("created_by")
   updatedAt DateTime? @updatedAt @map("updated_at")
-  updatedBy String?  @map("updated_by")
+  updatedBy String?   @map("updated_by")
   deletedAt DateTime? @map("deleted_at")
-  deletedBy String?  @map("deleted_by")
-
-  user User @relation(fields: [userId], references: [id])
-  role Role @relation(fields: [roleId], references: [id])
+  deletedBy String?   @map("deleted_by")
+  role      Role      @relation(fields: [roleId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, roleId])
   @@map("user_roles")
 }
 
 model Permission {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  createdBy   String?  @map("created_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  updatedBy   String?  @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedBy   String?  @map("deleted_by")
-
+  id              String           @id @default(uuid())
+  name            String           @unique
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  createdBy       String?          @map("created_by")
+  updatedAt       DateTime?        @updatedAt @map("updated_at")
+  updatedBy       String?          @map("updated_by")
+  deletedAt       DateTime?        @map("deleted_at")
+  deletedBy       String?          @map("deleted_by")
   rolePermissions RolePermission[]
 
   @@map("permissions")
 }
 
 model RolePermission {
-  id           String   @id @default(uuid())
-  roleId       String   @map("role_id")
-  permissionId String   @map("permission_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-  createdBy    String?  @map("created_by")
-  updatedAt    DateTime? @updatedAt @map("updated_at")
-  updatedBy    String?  @map("updated_by")
-  deletedAt    DateTime? @map("deleted_at")
-  deletedBy    String?  @map("deleted_by")
-
-  role       Role       @relation(fields: [roleId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  id           String     @id @default(uuid())
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  createdBy    String?    @map("created_by")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  updatedBy    String?    @map("updated_by")
+  deletedAt    DateTime?  @map("deleted_at")
+  deletedBy    String?    @map("deleted_by")
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
 }
 
-
 model Plant {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  description String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  createdBy   String?   @map("created_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedBy   String?   @map("deleted_by")
-
+  id             String          @id @default(uuid())
+  name           String          @unique
+  description    String?
+  createdAt      DateTime        @default(now()) @map("created_at")
+  createdBy      String?         @map("created_by")
+  updatedAt      DateTime?       @updatedAt @map("updated_at")
+  updatedBy      String?         @map("updated_by")
+  deletedAt      DateTime?       @map("deleted_at")
+  deletedBy      String?         @map("deleted_by")
   plantLocations PlantLocation[]
 
   @@map("plants")
 }
 
 model Location {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  description String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  createdBy   String?   @map("created_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedBy   String?   @map("deleted_by")
-
+  id             String          @id @default(uuid())
+  name           String          @unique
+  description    String?
+  createdAt      DateTime        @default(now()) @map("created_at")
+  createdBy      String?         @map("created_by")
+  updatedAt      DateTime?       @updatedAt @map("updated_at")
+  updatedBy      String?         @map("updated_by")
+  deletedAt      DateTime?       @map("deleted_at")
+  deletedBy      String?         @map("deleted_by")
   plantLocations PlantLocation[]
 
   @@map("locations")
@@ -140,9 +129,8 @@ model PlantLocation {
   updatedBy  String?   @map("updated_by")
   deletedAt  DateTime? @map("deleted_at")
   deletedBy  String?   @map("deleted_by")
-
-  plant    Plant    @relation(fields: [plantId], references: [id])
-  location Location @relation(fields: [locationId], references: [id])
+  location   Location  @relation(fields: [locationId], references: [id])
+  plant      Plant     @relation(fields: [plantId], references: [id])
 
   @@unique([plantId, locationId])
   @@map("plant_locations")

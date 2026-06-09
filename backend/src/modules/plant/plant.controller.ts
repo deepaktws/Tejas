@@ -16,4 +16,35 @@ export class PlantController {
       next(error);
     }
   };
+
+  createPlant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, locationId} = req.body;
+      const result = await this.plantService.createPlant({ name, locationId, createdBy: req.user!.id as string });
+      res.status(result.status).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updatePlant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { name, locationId } = req.body;
+      const result = await this.plantService.updatePlant(id as string, { name, locationId, updatedBy: req.user!.id as string });
+      res.status(result.status).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deletePlant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await this.plantService.deletePlant(id as string);
+      res.status(result.status).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

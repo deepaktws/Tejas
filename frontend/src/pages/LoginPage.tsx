@@ -1,7 +1,7 @@
 import { HeroPanel } from '../components/login/HeroPanel'
 import { LoginForm } from '../components/login/LoginForm'
 import { useNavigate } from 'react-router-dom'
-import loginService from '../service/auth.service'
+import { loginService, contactAdministratorService } from '../service/auth.service'
 import { setCredentials } from '../feature/authSlice'
 import { useDispatch } from 'react-redux'
 export function LoginPage() {
@@ -23,6 +23,17 @@ export function LoginPage() {
       throw new Error(error.message)
     }
   }  
+  const onContactAdministrator = async (): Promise<void> => {
+    try {
+      const response = await contactAdministratorService()
+      if (response.status === 200) {
+        navigate('/contact-administrator')
+      }
+    }
+    catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
   return (
     <main className="flex min-h-screen flex-col bg-surface-page lg:flex-row">
       <div className="order-2 lg:order-1 lg:flex lg:flex-1">
@@ -34,7 +45,7 @@ export function LoginPage() {
           className="w-full max-w-md rounded-2xl bg-surface-card p-2 sm:max-w-lg sm:p-4"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
-          <LoginForm onSignIn={onSignIn} />
+          <LoginForm onSignIn={onSignIn} onContactAdministrator={onContactAdministrator} />
         </div>
       </section>
     </main>

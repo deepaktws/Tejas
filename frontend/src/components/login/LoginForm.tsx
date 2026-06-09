@@ -4,18 +4,17 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import { useState } from 'react'
 
-import { Button, Checkbox, TextField } from '../ui'
+import { Button, TextField } from '../ui'
 import { images } from '../../utils/images'
-import { useNavigate } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
 import { toast } from 'react-toastify'
 type LoginFormProps = {
   onSignIn?: (username: string, password: string) => void
+  onContactAdministrator?: () => void
 }
 
-export function LoginForm({ onSignIn }: LoginFormProps) {
+export function LoginForm({ onSignIn, onContactAdministrator }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -119,7 +118,7 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
           <button
             type="button"
             className="font-medium text-brand-danger hover:underline cursor-pointer"
-            onClick={() => navigate('/contact-administrator')}
+            onClick={onContactAdministrator}
           >
             Contact Administrator
           </button>

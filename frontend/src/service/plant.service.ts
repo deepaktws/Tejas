@@ -1,21 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { api } from '../api/axios';
 
-const getPlants = async (page:number=1,limit:number=10,name:string='') => {
-    try{
-        const res = await fetch(`${API_URL}/plants?page=${page}&limit=${limit}&name=${name}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if(!res.ok){
-            throw new Error('Failed to fetch plants');
-        }
-        return await res.json();  
-    }catch(error){
-        console.error(error);
-        throw error;
-    }
-}
+const getPlants = async (page = 1, limit = 10, name = '') => {
+  const { data } = await api.get('/plants', {
+    params: { page, limit, name },
+  });
+  return data;
+};
 
 export { getPlants };

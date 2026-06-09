@@ -9,6 +9,7 @@
     "build": "tsup src/server.ts --format esm --clean",
     "start": "node dist/server.js",
     "createAdmin": "tsx src/scripts/initialScript.ts",
+    "postinstall": "prisma generate",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix"
   },
