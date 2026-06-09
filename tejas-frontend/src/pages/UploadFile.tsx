@@ -13,7 +13,7 @@ import {
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
 import uploadService from '../service/upload.service'
-import { downloadApiFile, getUploadRecordId, tryDownloadModelOutput } from '../utils/FileRead'
+import { downloadApiFile, getUploadRecordId, tryDownloadModelOutput, type PlannerFileIds } from '../utils/FileRead'
 import modelService from '../service/model.service'
 import downloadService from '../service/download.service'
 
@@ -29,6 +29,7 @@ function UploadFile() {
   const [stepFiles, setStepFiles] = useState(createEmptyStepFiles)
   const [uploadStatuses, setUploadStatuses] = useState(createEmptyUploadStatuses)
   const [pairedId, setPairedId] = useState<number | null>(null)
+  const [plannerFileIds, setPlannerFileIds] = useState<PlannerFileIds | null>(null)
 
 
   const yesterdayLabel = useMemo(() => {
@@ -76,16 +77,34 @@ function UploadFile() {
           break
         }
         case 'scrap-chem':
-          await uploadService.uploadScrapChem(formData)
+          const scrapChemResponse = await uploadService.uploadScrapChem(formData)
+          const scrapChemRecordId = getUploadRecordId(scrapChemResponse?.data)
+          if (scrapChemRecordId != null) {
+           
+            setPlannerFileIds({ ...plannerFileIds, scrapChemId: scrapChemRecordId })
+          }
+          setPlannerFileIds({ ...plannerFileIds, scrapChemId: scrapChemRecordId })
           break
         case 'heat-query-scheduled-heats':
-          await uploadService.uploadHeatQuerySchedule(formData)
+          const heatQueryScheduleResponse = await uploadService.uploadHeatQuerySchedule(formData)
+          const heatQueryScheduleRecordId = getUploadRecordId(heatQueryScheduleResponse?.data)
+          if (heatQueryScheduleRecordId != null) {
+            setPlannerFileIds({ ...plannerFileIds, heatQueryScheduleId: heatQueryScheduleRecordId })
+          }
           break
         case 'scrap-data-daily-inventory':
-          await uploadService.uploadScrapDataInventory(formData)
+          const scrapDataInventoryResponse = await uploadService.uploadScrapDataInventory(formData)
+          const scrapDataInventoryRecordId = getUploadRecordId(scrapDataInventoryResponse?.data)
+          if (scrapDataInventoryRecordId != null) {
+            setPlannerFileIds({ ...plannerFileIds, scrapInventoryId: scrapDataInventoryRecordId })
+          }
           break
         case 'met-grade-list':
-          await uploadService.uploadGradeList(formData)
+          const gradeListResponse = await uploadService.uploadGradeList(formData)
+          const gradeListRecordId = getUploadRecordId(gradeListResponse?.data)
+          if (gradeListRecordId != null) {
+            setPlannerFileIds({ ...plannerFileIds, gradeListId: gradeListRecordId })
+          }
           break
       }
       setSlotUploadStatus(slotId, 'uploaded')

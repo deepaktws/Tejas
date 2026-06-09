@@ -180,28 +180,7 @@ def run_optimization_pulp(df_input, target_df, param_df, return_json=False):
         m += (lpSum(x[i] * vec[i] for i in range(n)) <= target_dict[element]['Max'] * total_qty)
 
     # Solve the model
-    # m.solve(PULP_CBC_CMD(msg=False))
-    def get_solver_path():
-        if getattr(sys, 'frozen', False):
-            # 👉 inside EXE (temp folder)
-            base_path = Path(sys._MEIPASS)
-        else:
-            # 👉 normal python
-            base_path = Path(__file__).parent
-
-        solver_path = base_path / "solver" / "cbc.exe"
-
-        print("🔍 Looking for solver at:", solver_path)
-
-        return solver_path
-
-
-    solver_path = get_solver_path()
-
-    if not solver_path.exists():
-        raise ValueError(f"CBC solver not found at {solver_path}")
-
-    m.solve(COIN_CMD(path=str(solver_path), msg=False))
+    m.solve(get_cbc_solver(msg=False))
     # m.solve(GUROBI())
 
     print("Solver Status:", m.status)

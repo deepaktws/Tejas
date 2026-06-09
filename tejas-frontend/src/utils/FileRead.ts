@@ -67,3 +67,10 @@ export function tryDownloadModelOutput(data: HeatUploadResponseData | undefined)
     downloadModelOutputFile(outputFile)
   }
 }
+
+export interface PlannerFileIds {
+  scrapChemId?: number
+  heatQueryScheduleId?: number
+  scrapInventoryId?: number
+  gradeListId?: number
+}
