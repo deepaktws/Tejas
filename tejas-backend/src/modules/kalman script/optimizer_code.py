@@ -20,6 +20,9 @@ def run_optimization_pulp2(df_input, target_df, plan_weight):
     input_scrap_max = df_input['Inventory']
     # input_scrap_min = df_input['Min Quantity To be Use (NT)']
 
+    input_scrap_max_usage = df_input['Maximum_Usage']
+    input_scrap_min_usage = 0.03
+
     # input_chem_table = df_input[['C','Si','Mn','Cu','Cr','Ni','Sn','P','S','Mb','Fe']]
     input_chem_table = df_input[['Fe', 'C', 'Cu', 'Ni', 'Cr', 'Mo', 'Sn', 'Si', 'Mn']] # from scrap availability file
 
@@ -31,6 +34,9 @@ def run_optimization_pulp2(df_input, target_df, plan_weight):
     target_dict = target_df.to_dict(orient='index')
     # input_min_constraints = np.zeros(len(input_chem_table.columns))
     # input_max_constraints = np.ones(len(input_chem_table.columns)) * 1.0
+
+    at_most_one_dict = {1:['Beach Iron', 'Furnace Iron']}
+    min_Cu_in_grade_dict = {'Shred':0.18, '#1 HeavyMelt': 0.24, 'Auto Cast': 0.24, 'Machine Cast':0.24}
 
     n = len(input_scrap_name)
 
@@ -60,6 +66,11 @@ def run_optimization_pulp2(df_input, target_df, plan_weight):
     # max_total_qty_per_heat = float(param_df.loc[param_df['Parameter']=='Total capacity per heat','Value'].values[0])
     max_total_qty_per_heat = float(plan_weight)
     m += total_qty >= max_total_qty_per_heat
+
+    # Max and Min usage in a heat
+    for i in range(n):
+        m += x[i] <= total_qty * input_scrap_max_usage[i] + 1000 * (1-y[i])
+        m += x[i] >= total_qty * input_scrap_min_usage - 1000 * (1-y[i])
 
     # case 1
     # # if PI or HBI is selected then select 5 scraps else select <=7 scraps
@@ -92,6 +103,21 @@ def run_optimization_pulp2(df_input, target_df, plan_weight):
         vec = input_chem_table[element].values
         m += (lpSum(x[i] * vec[i] for i in range(n)) >= target_dict[element]['Min'] * total_qty)
         m += (lpSum(x[i] * vec[i] for i in range(n)) <= target_dict[element]['Max'] * total_qty)
+
+    # Not using multiple scrap types together
+    for cat in at_most_one_dict:
+        set1 = set(at_most_one_dict[cat])
+        scrap_ind = [i for i, x in enumerate(input_scrap_name) if x in set1]
+
+        m += lpSum(x[i] for i in scrap_ind) <= 1
+
+    # Using scraps based on min Cu
+    for scrap in min_Cu_in_grade_dict:
+        scrap_ind = [i for i, x in enumerate(input_scrap_name) if x == scrap]
+
+        if target_dict['Cu']['Min'] < min_Cu_in_grade_dict[scrap] and scrap_ind != []:
+            for ind in scrap_ind:
+                m += y[ind] == 0
 
     # Solve the model
     m.solve(PULP_CBC_CMD(msg=False))
