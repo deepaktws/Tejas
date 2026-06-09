@@ -1,3 +1,4 @@
+import CircularProgress from '@mui/material/CircularProgress'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined'
 import { useMemo, useState } from 'react'
@@ -13,7 +14,13 @@ import {
   isStepEnabled,
 } from '../components/upload/uploadStepsConfig'
 import uploadService from '../service/upload.service'
-import { downloadApiFile, getUploadRecordId, tryDownloadModelOutput, type PlannerFileIds } from '../utils/FileRead'
+import {
+  downloadApiFile,
+  downloadModelOutputFile,
+  getUploadRecordId,
+  tryDownloadModelOutput,
+  type PlannerFileIds,
+} from '../utils/FileRead'
 import modelService from '../service/model.service'
 import downloadService from '../service/download.service'
 
@@ -30,6 +37,7 @@ function UploadFile() {
   const [uploadStatuses, setUploadStatuses] = useState(createEmptyUploadStatuses)
   const [pairedId, setPairedId] = useState<number | null>(null)
   const [plannerFileIds, setPlannerFileIds] = useState<PlannerFileIds | null>(null)
+  const [isPlannerRunning, setIsPlannerRunning] = useState(false)
 
 
   const yesterdayLabel = useMemo(() => {
@@ -114,9 +122,20 @@ function UploadFile() {
   }
 
   const handleRunPlanner = async () => {
-    if (!requiredStepsUploaded) return
-    const response = await modelService.runModel()
-    console.log(response)
+    if (!requiredStepsUploaded || isPlannerRunning || !plannerFileIds) return
+
+    setIsPlannerRunning(true)
+    try {
+      const response = await modelService.runModel(plannerFileIds)
+      const outputFile = response?.data?.output_file
+      if (response?.data?.success && outputFile?.content_base64) {
+        downloadModelOutputFile(outputFile)
+      }
+    } catch (error) {
+      console.error('Error running planner', error)
+    } finally {
+      setIsPlannerRunning(false)
+    }
   }
 
   const handleDownloadYesterday = async (stepId: string) => {
@@ -195,18 +214,22 @@ function UploadFile() {
           <div className="mt-8 flex flex-col items-center">
             <button
               type="button"
-              disabled={!requiredStepsUploaded}
+              disabled={!requiredStepsUploaded || isPlannerRunning}
               onClick={handleRunPlanner}
               className={[
                 'inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-base font-semibold text-text-inverse transition-opacity',
                 'focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-border-selected',
-                requiredStepsUploaded
+                requiredStepsUploaded && !isPlannerRunning
                   ? 'cursor-pointer bg-linear-to-t from-green-700 to-green-500 hover:opacity-90'
                   : 'cursor-not-allowed bg-text-muted',
               ].join(' ')}
             >
-              <PlayCircleOutlinedIcon sx={{ fontSize: 24 }} aria-hidden />
-              Run Planner & Download Daily Plan
+              {isPlannerRunning ? (
+                <CircularProgress size={24} sx={{ color: 'inherit' }} aria-hidden />
+              ) : (
+                <PlayCircleOutlinedIcon sx={{ fontSize: 24 }} aria-hidden />
+              )}
+              {isPlannerRunning ? 'Running Planner...' : 'Run Planner & Download Daily Plan'}
             </button>
             <p className="mt-3 text-sm text-text-secondary">
               All required files must be uploaded to enable this button.
