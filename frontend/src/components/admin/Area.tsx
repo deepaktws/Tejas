@@ -1,6 +1,9 @@
 import { areasData } from "../../staticData"
 import TabsWithButton from "./Tabs"
 import { images } from "../../utils/images"
+import { useState } from 'react'
+import EditModal from './EditModal'
+import AreaEditForm from './AreaEditForm'
 
 const tableColumns = [
     'Area Name',
@@ -12,7 +15,8 @@ const tableColumns = [
 
 
 export default function Area() {
-
+    const [selectedArea, setSelectedArea] = useState<(typeof areasData)[number] | null>(null)
+    
     function handleAddArea() {
         console.log('Add Area')
     }
@@ -70,6 +74,7 @@ export default function Area() {
                                             type="button"
                                             aria-label={`Edit ${area.areaName}`}
                                             className="text-brand-accent hover:opacity-80"
+                                            onClick={() => setSelectedArea(area)}
                                         >
                                             <img src={images.editIcon} alt="Edit" className="w-4 h-4" />
                                         </button>
@@ -87,6 +92,15 @@ export default function Area() {
                     </tbody>
                 </table>
             </div>
+            <EditModal
+                isOpen={!!selectedArea}
+                title="VIEW AREA"
+                onClose={() => setSelectedArea(null)}
+            >
+                {selectedArea && (
+                    <AreaEditForm area={selectedArea} />
+                )}
+            </EditModal>
         </div>
     )
 }
