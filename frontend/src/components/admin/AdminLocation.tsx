@@ -1,6 +1,10 @@
 import { AdminLocationsData } from "../../staticData"
 import TabsWithButton from "./Tabs"
 import { images } from "../../utils/images"
+import { useState } from 'react'
+import EditModal from './EditModal'
+import LocationEditForm from './LocationEditForm'
+
 const tableColumns = [
     'Name',
     'Business Unit',
@@ -14,6 +18,7 @@ const tableColumns = [
 
 
 export default function AdminLocation() {
+    const [selectedLocation, setSelectedLocation] = useState<(typeof AdminLocationsData)[number] | null>(null)
 
     function handleAddLocation() {
         console.log('Add Location')
@@ -81,6 +86,7 @@ export default function AdminLocation() {
                                             type="button"
                                             aria-label={`Edit ${location.name}`}
                                             className="text-brand-accent hover:opacity-80"
+                                            onClick={() => setSelectedLocation(location)}
                                         >
                                             <img src={images.editIcon} alt="Edit" className="w-4 h-4" />
                                         </button>
@@ -98,6 +104,15 @@ export default function AdminLocation() {
                     </tbody>
                 </table>
             </div>
+            <EditModal
+                isOpen={!!selectedLocation}
+                title="VIEW LOCATION"
+                onClose={() => setSelectedLocation(null)}
+            >
+                {selectedLocation && (
+                    <LocationEditForm location={selectedLocation} />
+                )}
+            </EditModal>
         </div>
     )
 }
