@@ -2,6 +2,9 @@ import { toast } from 'react-toastify'
 import { usersData } from '../../staticData'
 import TabsWithButton from './Tabs'
 import { images } from '../../utils/images'
+import { useState } from 'react';
+import EditModal from './EditModal'
+import UserEditForm from './UserEditForm'
 
 const tableColumns = [
     'User Name',
@@ -41,6 +44,8 @@ function handleAddUser() {
 
 
 export default function User() {
+    const [selectedUser, setSelectedUser] = useState<(typeof usersData)[number] | null>(null)
+
     return (
         <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
             <TabsWithButton buttonText="Add User" onButtonClick={handleAddUser} />
@@ -97,6 +102,7 @@ export default function User() {
                                             type="button"
                                             aria-label={`Edit ${user.userName}`}
                                             className="text-brand-accent hover:opacity-80"
+                                            onClick={() => setSelectedUser(user)}
                                         >
                                             <img src={images.editIcon} alt="Edit" className="w-4 h-4" />
                                         </button>
@@ -114,6 +120,15 @@ export default function User() {
                     </tbody>
                 </table>
             </div>
+            <EditModal
+                isOpen={!!selectedUser}
+                title={`Edit ${selectedUser?.userName ?? ''}`}
+                onClose={() => setSelectedUser(null)}
+            >
+                {selectedUser && (
+                    <UserEditForm user={selectedUser} />
+                )}
+            </EditModal>
         </div>
     )
 }
