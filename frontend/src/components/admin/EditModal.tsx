@@ -22,7 +22,7 @@ export default function EditModal({
             />
 
             {/* Modal */}
-            <div className="absolute top-4 right-0 bottom-4 w-[420px] box-border overflow-hidden rounded-l-2xl border-8 border-white bg-white shadow-2xl">
+            <div className="absolute top-4 right-0 max-h-[calc(100vh-2rem)] w-[420px] box-border overflow-hidden rounded-l-2xl border-8 border-white bg-white shadow-2xl">
                 <div className="flex items-center justify-between bg-linear-to-b from-brand-primary to-brand-primary-dark px-4 py-3 text-white">
                     <h2 className="text-lg font-semibold">
                         {title}
@@ -36,7 +36,7 @@ export default function EditModal({
                     </button>
                 </div>
 
-                <div className="h-[calc(100%-56px)] overflow-y-auto p-6">
+                <div className="max-h-[calc(100vh-120px)] overflow-y-auto p-6">
                     {children}
                 </div>
             </div>
