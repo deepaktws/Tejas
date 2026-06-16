@@ -122,7 +122,7 @@ export default function User() {
             </div>
             <EditModal
                 isOpen={!!selectedUser}
-                title={`Edit ${selectedUser?.userName ?? ''}`}
+                title={`VIEW USER`}
                 onClose={() => setSelectedUser(null)}
             >
                 {selectedUser && (
