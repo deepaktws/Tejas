@@ -3,7 +3,7 @@ import TabsWithButton from "./Tabs"
 import { images } from "../../utils/images"
 import { useState } from 'react'
 import EditModal from './EditModal'
-import LocationEditForm from './LocationEditForm'
+import { locationEditSections } from "./LocationEditForm"
 
 const tableColumns = [
     'Name',
@@ -19,7 +19,7 @@ const tableColumns = [
 
 export default function AdminLocation() {
     const [selectedLocation, setSelectedLocation] = useState<(typeof AdminLocationsData)[number] | null>(null)
-
+    const [formData, setFormData] = useState<any>(null)
     function handleAddLocation() {
         console.log('Add Location')
     }
@@ -106,13 +106,18 @@ export default function AdminLocation() {
             </div>
             <EditModal
                 isOpen={!!selectedLocation}
-                title="VIEW LOCATION"
+                title="VIEW USER"
+                sections={locationEditSections}
+                data={formData || selectedLocation}
                 onClose={() => setSelectedLocation(null)}
-            >
-                {selectedLocation && (
-                    <LocationEditForm location={selectedLocation} />
-                )}
-            </EditModal>
+                onChange={(name, value) =>
+                    setFormData((prev: any) => ({
+                        ...(prev || selectedLocation),
+                        [name]: value,
+                    }))
+                }
+                onSave={() => console.log(formData)}
+            />
         </div>
     )
 }

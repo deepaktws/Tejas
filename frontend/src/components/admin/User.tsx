@@ -4,7 +4,7 @@ import TabsWithButton from './Tabs'
 import { images } from '../../utils/images'
 import { useState } from 'react';
 import EditModal from './EditModal'
-import UserEditForm from './UserEditForm'
+import { userEditSections } from "./UserEditForm"
 
 const tableColumns = [
     'User Name',
@@ -45,6 +45,7 @@ function handleAddUser() {
 
 export default function User() {
     const [selectedUser, setSelectedUser] = useState<(typeof usersData)[number] | null>(null)
+    const [formData, setFormData] = useState<any>(null)
 
     return (
         <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
@@ -122,13 +123,18 @@ export default function User() {
             </div>
             <EditModal
                 isOpen={!!selectedUser}
-                title={`VIEW USER`}
+                title="VIEW USER"
+                sections={userEditSections}
+                data={formData || selectedUser}
                 onClose={() => setSelectedUser(null)}
-            >
-                {selectedUser && (
-                    <UserEditForm user={selectedUser} />
-                )}
-            </EditModal>
+                onChange={(name, value) =>
+                    setFormData((prev: any) => ({
+                        ...(prev || selectedUser),
+                        [name]: value,
+                    }))
+                }
+                onSave={() => console.log(formData)}
+            />
         </div>
     )
 }

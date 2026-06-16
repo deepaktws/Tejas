@@ -3,7 +3,7 @@ import TabsWithButton from "./Tabs"
 import { images } from "../../utils/images"
 import { useState } from 'react'
 import EditModal from './EditModal'
-import AreaEditForm from './AreaEditForm'
+import { areaEditSections } from "./AreaEditForm"
 
 const tableColumns = [
     'Area Name',
@@ -16,6 +16,7 @@ const tableColumns = [
 
 export default function Area() {
     const [selectedArea, setSelectedArea] = useState<(typeof areasData)[number] | null>(null)
+    const [formData, setFormData] = useState<any>(null)
     
     function handleAddArea() {
         console.log('Add Area')
@@ -94,13 +95,18 @@ export default function Area() {
             </div>
             <EditModal
                 isOpen={!!selectedArea}
-                title="VIEW AREA"
+                title="VIEW USER"
+                sections={areaEditSections}
+                data={formData || selectedArea}
                 onClose={() => setSelectedArea(null)}
-            >
-                {selectedArea && (
-                    <AreaEditForm area={selectedArea} />
-                )}
-            </EditModal>
+                onChange={(name, value) =>
+                    setFormData((prev: any) => ({
+                        ...(prev || selectedArea),
+                        [name]: value,
+                    }))
+                }
+                onSave={() => console.log(formData)}
+            />
         </div>
     )
 }
